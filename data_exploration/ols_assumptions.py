@@ -57,6 +57,7 @@ class OLSAssumptions(object):
         _, p_value3,_,_ = het_breuschpagan(self.residuals[3],
                                            sm.add_constant(self.dataframe.loc[:,'x']))
         self.p_value = [p_value0, p_value1, p_value2, p_value3]
+        print("het_breu_p_value", self.p_value)
         result = [False, False, False, False] #Is Homocedastic and so no transformation needed
         if p_value0 < 0.05:
             result.pop(0)
@@ -106,6 +107,7 @@ class OLSAssumptions(object):
         _,jb_p_value3,_,_ = sm.stats.stattools.jarque_bera(self.residuals[2])
         _,jb_p_value4,_,_ = sm.stats.stattools.jarque_bera(self.residuals[3])
         self.jb_p_value = [jb_p_value1, jb_p_value2, jb_p_value3, jb_p_value4]
+        print("jb_p_value", self.jb_p_value)
         #Initial assumption of non-normality of residuals
         result = [False, False, False, False]
         if jb_p_value1 > 0.05 or jb_p_value1 == 0.05:
@@ -171,8 +173,9 @@ class OLSAssumptions(object):
         _,rainbow_p_value2 = linear_rainbow(self.model[1])
         _,rainbow_p_value3 = linear_rainbow(self.model[2])
         _,rainbow_p_value4 = linear_rainbow(self.model[3])
-        self.rainbow_p_value = [rainbow_p_value1, rainbow_p_value2, 
+        self.rainbow_p_value = [rainbow_p_value1, rainbow_p_value2,
                                 rainbow_p_value3, rainbow_p_value4]
+        print("rainbow_p_value", self.rainbow_p_value)
         result = [True, True, True, True] #Linearity assumed initially
         #Indication of Non-linearity, so we may try transforming variables
         if rainbow_p_value1 < 0.05:
@@ -207,7 +210,7 @@ class OLSAssumptions(object):
                               dw_statistics3, dw_statistics4]
         result = [False, False, False, False] #Assume autocorrelation at the beginning
         
-        print("dw_statistics1 ", dw_statistics1)
+        print("dw_statistics1 ", self.dw_statistics)
         if dw_statistics1 >= 1.5 and dw_statistics1 <= 2.5:
             result.pop(0)
             result.insert(0, True)
