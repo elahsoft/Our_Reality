@@ -1,19 +1,21 @@
 '''
 Imports all the modules needed by the class.
 '''
-import pandas as pd
 import numpy as np
-import config.config as cf
 class DataWrangler(object):
     """
     A simple DataWrangler class.
     Attributes:
-        file_name (str): The name of the file bearing our dataset to be wrangled.
+        df_data(pandas.dataframe): The pandas dataframe object bearing the dataset 
+        to be wrangled
+        self.lower_bound_outlier(Integer): An integer indicating the lower bound
+        determinant of outliers
+        self.upper_bound_outlier(Integer): An integer indicating the upper bound 
+        determinant of outliers
     Methods:
-        load_data(): Loads the dataset from the file into a pandas dataframe.
         shape_of_data(df_data): Returns the shape of the dataframe passed to it.
-        summary_statistics(column_data): Returns a summary statistics of pandas dataframe 
-        column passed to it.
+        summary_statistics(column_data): Returns a summary statistics of pandas dataframe
+        passed to it.
         find_missing_values(df_data): Returns a list of missing values (nan) by columns.
         duplicated_rows(df_data): Returns duplicated rows
         drop_duplicates(df_data): Returns a pandas dataframe with duplicated rows dropped.
@@ -31,82 +33,65 @@ class DataWrangler(object):
             df_data = data_wrangler.load_data()
             print(df_data.head(5))  # Output: The first five rows of the train dataset
     """
-    def __init__(self, file_name):
+    def __init__(self, df_data):
         '''
         Constructor for the DataWrangler Class
-        file_name: The Name of the file from which we get our raw data for wrangling
+        df_data: The dataframe for wrangling
         '''
-        self.file_name = file_name
+        self.df_data = df_data
         self.lower_bound_outlier = 0
         self.upper_bound_outlier = 0
-    def load_data(self):
-        '''
-        Loads the file received by constructor to pandas dataframe
-        return: A pandas dataframe bearing the content of our file passed to constructor
-        '''
-        df_data = None
-        try:
-            df_data = pd.read_csv(filepath_or_buffer=cf.INPUT_FILE_PATH+self.file_name,
-                                  sep=",", encoding="latin1")
-        except FileNotFoundError:
-            print(f"Error: The file '{self.file_name}' was not found")
-        except pd.errors.EmptyDataError:
-            print(f"Error: The file '{self.file_name}' is empty")
-        except pd.errors.ParserError as e:
-            print(f"Error while parsing csv: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred {e}")
-        finally:
-            pass
-        return df_data
-    def shape_of_data(self, df_data):
+   
+    def shape_of_data(self):
         '''
         Computes the shape of the dataframe passed to it
         return: A tuple, which is the shape of the dataframe.
         '''
-        df_shape = df_data.shape
+        df_shape = self.df_data.shape
         return df_shape
-    def summary_statistics(self, column_data):
+    def summary_statistics(self):
         '''
         Computes the summary statistic of each column of the dataframe
         return: A dataframe, which gives a summary statistic of each
         column in the dataframe.
         '''
-        return column_data.describe()
-    def find_missing_values(self, df_data):
+        return self.df_data.describe()
+    def find_missing_values(self):
         '''
         Computes the count of missing values in each column of the dataframe
         return: Returns a pandas series bearing the details on the count of missing
         values in each column of the dataframe
         '''
-        df_result = df_data.apply(lambda x: sum(x.isnull()), axis=0)
+        df_result = self.df_data.apply(lambda x: sum(x.isnull()), axis=0)
         return df_result
-    def duplicated_rows(self,df_data):
+    def duplicated_rows(self):
         '''
         Finds all duplicated rows in the dataframe
         return: Returns a dataframe bearing duplicated rows in the dataframe
         '''
-        df_duplicated = df_data.duplicated()
+        df_duplicated = self.df_data.duplicated()
         return df_duplicated
-    def drop_duplicated(self, df_data):
+    def drop_duplicated(self):
         '''
         Drops all duplicated rows in the dataframe and keeps the first
         occurrence
         return: Returns a dataframe bearing no duplicated rows
         '''
-        df_data = df_data.drop_duplicates(keep="first")
+        df_data = self.df_data.drop_duplicates(keep="first")
         return df_data
-    def fill_missing_values(self, df_data):
+    def fill_missing_values(self):
         '''
         Fills all missing values in each column with the mean value of the
         column
         return: Returns a dataframe bearing no missing value
         '''
-        df_data = df_data.apply(lambda col: col.fillna(col.mean()))
+        df_data = self.df_data.apply(lambda col: col.fillna(col.mean()))
         return df_data
     def find_outliers(self, df_column):
         '''
         Finds all outlier values in the dataframe column passed to it
+        df_column: The column extracted from the dataframe that outliers
+        existing in it are to be found.
         return: Returns a list bearing all outlier values in the column
         '''
         third_quar = np.percentile(df_column.to_numpy(), 75)
@@ -127,6 +112,7 @@ class DataWrangler(object):
         '''
         Determines if a value is an outlier based on our 
         dataset column in consideration
+        value: Value to be determined if it is an outlier
         return: The Numeric Value passed to it is less than the computed
         lower bound outlier determinant or greater than the upper bound
         outlier determinant
@@ -141,6 +127,10 @@ class DataWrangler(object):
         the mean of the values in the column. Checks if the number of datapoints that
         are outliers is like 2% of the number of rows, it handles it, else it returns
         the column without handling it.
+        outliers: A list of values considered to be outliers in the column
+        df_column extracted from the dataframe
+        df_column: The column extracted from the dataframe, that we want to 
+        replace outliers in it with the mean.
         return: The Dataframe column with outliers replaced by the mean value
         '''
         percentage_of_outliers = len(outliers)/len(df_column) * 100
@@ -153,11 +143,11 @@ class DataWrangler(object):
                 return df_column
         else:
             return df_column
-    def sort_data(self, df_data):
+    def sort_data(self):
         '''
         Sorts the dataframe passed to it by the column x
         return: The sorted dataframe
         '''
-        sorted_df_data = df_data.sort_values(by='x')
+        sorted_df_data = self.df_data.sort_values(by='x')
         return sorted_df_data
 
