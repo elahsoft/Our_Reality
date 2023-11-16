@@ -6,17 +6,14 @@ import copy
 from model_evaluation.determine_ideal_func import DetermineIdealFunctions
 class TestDetermineIdealFinctions(unittest.TestCase):
     '''
-    A simple Test Class for the DetermineIdealFinctions  Class
+    A simple Test Class for the DetermineIdealFunctions  Class
     Attributes:
-        ols(OLS): an object of the OLS class, responsible for the fitting of 
-        a linear regression model on the training dataset
-        data_wrangler(DataWrangler): An object of the DataWrangler class, responsible
-        for wrangling the dataset
-        df_data(pandas.dataframe): Pandas dataframe object bearing the dataset
-        to be wrangled.
-        ols_assump(OLSAssumptions): An object of the OLSAssumptions class that
-        we use to access the methods of the class for testing.
-        
+        deter_ideal_func(DetermineIdealFunctions): an object of the DetermineIdealFunctions class, 
+        that grants us access to methods of the class.
+        expected_sum_squared_devia(list): A list that bears the expected values of the 
+        self.sum_of__ideal_deviation variable if sum_of_devia_ideal_func() did the 
+        computation correctly.       
+                
     Methods:
         setUp(): Does the initialization of attributes needed for running 
         the test.
@@ -67,7 +64,6 @@ class TestDetermineIdealFinctions(unittest.TestCase):
                                            22803066.898016, 22877164.19763894, 
                                            22979847.895948198, 22926302.092695817, 
                                            22919981.35999242, 22923768.71628605]
-        self.ideal_func = None
     def test_sum_of_deviation(self):
         '''
         Tests the sum_of_deviation method.

@@ -64,7 +64,7 @@ class EvaluateModel(DetermineIdealFunctions):
         print("output of Mapping", evaluateModel.mapped)
     """
     def __init__(self, file_name1, file_name2, file_name3):
-        super().__init__(file_name1, file_name2)
+        super().__init__(file_name2, file_name1)
         super().sum_of_deviation()
         super().calculated_max_deviation()
         self.ideal_dataset = super().get_ideal_dataframe()
