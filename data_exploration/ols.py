@@ -6,7 +6,9 @@ import pandas as pd
 import config.config as cf
 class OLS(object):
     """
-    A simple OLS class.
+    A simple Linear Regression Fitting Class that uses Ordinary Least 
+    Square Method for the fitting.
+    
     Attributes:
         file_name(string): The filename of the file bearing the dataset
         to be fitted a linear regression model on using Ordinary Least Square
@@ -16,6 +18,7 @@ class OLS(object):
         model(list): A list of models created for y1, y2, y3 and y4
         residuals(list): A  list bearing the residuals of y1, y2, y3, y4 with 
         regards to the training dataset used in creating the model
+        
     Methods:
         load_data(): Loads the dataset from the file into a pandas dataframe.
         get_dataframe(): gets the dataframe created with the file passed to the class
@@ -23,6 +26,11 @@ class OLS(object):
         compute_residuals(): Computes the residuals of the dataset
         prepare_predicted_value(): Returns a list bearing the dataset of predictions from
         our model created.
+        
+    Usage:
+        ols = new OLS(file_name)
+        ols.load_data()
+        print(ols.get_dataframe())
     """
     def __init__(self,file_name):
         '''
@@ -87,11 +95,11 @@ class OLS(object):
         returns: a 2-D list with four columns, each column
         bearing the predicted value of y1, y2, y3, and y4
         '''
-        predicted_values = [None, None, None, None]
+        predicted_values = []
         x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])
         i=0
         while i < 4:
-            predicted_values[i] = self.model[i].predict(x_with_constant)
+            predicted_values.insert(i,self.model[i].predict(x_with_constant))
             i = i+1
         return predicted_values
         

@@ -19,7 +19,7 @@ class TestOLSAssumptions(unittest.TestCase):
         we use to access the methods of the class for testing.
         
     Methods:
-        setUp(): Does the initialization of attributes needed to running 
+        setUp(): Does the initialization of attributes needed for running 
         the test.
         test_check_heterocedasticity(): Tests the check_heterocedasticity method.
         test_check_normality(): Tests the check_normality method that creates a

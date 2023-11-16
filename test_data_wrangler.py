@@ -27,7 +27,7 @@ class TestDataWrangler(unittest.TestCase):
         outlier_y4(list): A list bearing outlier values found in column y4 of our 
         training dataset
     Methods:
-        setUp(): Does the initialization of attributes needed to running 
+        setUp(): Does the initialization of attributes needed for running 
         the test.
         test_load_data(): Tests the load_data() method of the class, that
         it truely creates an instance of a pandas dataframe.
