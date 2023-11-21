@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from model_evaluation.determine_ideal_func import DetermineIdealFunctions
 from data_exploration.ols import OLS
+from data_exploration.data_wrangler import DataWrangler
 class EvaluateModel(DetermineIdealFunctions):
     """
     A simple EvaluateModel class that mapps the four selected ideal functions
@@ -28,7 +29,7 @@ class EvaluateModel(DetermineIdealFunctions):
         selected ideal functions not being more than a sqrt(2).
         max(list): A 2-D list that bears the index of the four selected functions that 
         have the maximum deviation from the test data (row wise)
-        ideal_test_devia(list): A 2-D list that bears the squared deviation value of the 
+        ideal_train_devia(list): A 2-D list that bears the squared deviation value of the 
         selected four ideal functions from the test dataset.
         mapped(pandas.dataframe): A dataframe bearing the output of the mapping of the
         selected four ideal functions to the test dataset, with columns: x, y, ideal_1_deviation,
@@ -36,9 +37,9 @@ class EvaluateModel(DetermineIdealFunctions):
         
     Methods:
         extract_selected_ideal_data(): Extracts the corresponding selected four ideal function 
-        equivalents of the test dataset. returns: a 2-D bearing the corresponding selected 
-        four ideal function equivalents of the test dataset.
-        compute_test_devia_from_ideal(list): Computes the squared deviation of the test dataset
+        equivalents of the train dataset. returns: a 2-D bearing the corresponding selected 
+        four ideal function equivalents of the train dataset.
+        compute_train_devia_from_ideal(list): Computes the squared deviation of the train dataset
         from its corresponding dataset for the four selected ideal functions.
         determine_max_deviation(): Determines the maximum deviation out of the four
         deviation values of each row of test data from the four selected ideal functions. 
@@ -56,8 +57,8 @@ class EvaluateModel(DetermineIdealFunctions):
         
     Usage:
         evaluateModel = new EvaluateModel("train.csv", "ideal.csv", "test.csv)
-        evaluateModel.extract_selected_ideal_data()
-        evaluateModel.compute_test_devia_from_ideal(self.selected_ideal_dataset)
+        selected_ideal_dataset = evaluateModel.extract_selected_ideal_data()
+        evaluateModel.compute_test_devia_from_ideal(selected_ideal_dataset)
         evaluateModel.determine_max_deviation()
         evaluateModel.map_ideal()
         evaluateModel.construct_mapping_df()
@@ -66,6 +67,7 @@ class EvaluateModel(DetermineIdealFunctions):
     def __init__(self, file_name1, file_name2, file_name3):
         super().__init__(file_name2, file_name1)
         super().sum_of_deviation()
+        super().sum_of_devia_ideal_func()
         super().calculated_max_deviation()
         self.ideal_dataset = super().get_ideal_dataframe()
         #Divided by the number of rows of column x to normalize
@@ -79,53 +81,150 @@ class EvaluateModel(DetermineIdealFunctions):
         self.test_df = self.ols_test.dataframe
         self.mapping = []
         self.max = []
-        self.ideal_test_devia = [[],[],[],[]]
+        self.ideal_train_devia = []
         self.mapped = None
     def extract_selected_ideal_data(self):
         '''
         Extracts the corresponding selected four ideal function 
-        equivalents of the test dataset
+        equivalents of the training dataset
         returns: a 2-D bearing the corresponding selected four ideal function 
-        equivalents of the test dataset
+        equivalents of the training dataset
         '''
-        col = self.test_df.loc[:,'x']
+        col = self.train_df.loc[:,'x']
         #the corresponding selected four ideal functions dataset
         #for the test data
-        selected_ideal_dataset = [[],[],[],[]]
+        selected_ideal_dataset = []
         i=0
         for value in col:
-            selected_ideal_dataset[i].insert(0,
+            temp_list = []
+            temp_list.insert(0,
                 self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[0]].value)
-            selected_ideal_dataset[i].insert(1,
+                                                      self.four_ideal_func[0]].values[0])
+            temp_list.insert(1,
                 self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[1]].value)
-            selected_ideal_dataset[i].insert(2,
+                                                      self.four_ideal_func[1]].values[0])
+            temp_list.insert(2,
                 self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[2]].value)
-            selected_ideal_dataset[i].insert(3,
+                                                      self.four_ideal_func[2]].values[0])
+            temp_list.insert(3,
                 self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[3]].value)
+                                                      self.four_ideal_func[3]].values[0])
+            selected_ideal_dataset.insert(i, temp_list)
             i = i+1
         return selected_ideal_dataset
-    def compute_test_devia_from_ideal(self, ideal_equivalence):
+    def compute_train_devia_from_ideal(self):
         '''
         Computes the squared deviation of the test dataset
         from its corresponding dataset for the four selected
         ideal functions
         '''
-        col_x = self.test_df.loc[:,'y']
+        #defined in the super class of EvaluateModel class
+        col_y1 = self.train_df.loc[:,'y1']
+        col_y2 = self.train_df.loc[:,'y2']
+        col_y3 = self.train_df.loc[:,'y3']
+        col_y4 = self.train_df.loc[:,'y4']
+        selec_ideal_1_list = []
+        selec_ideal_2_list = []
+        selec_ideal_3_list = []
+        selec_ideal_4_list = []
         i = 0
-        for value in col_x:
-            self.ideal_test_devia[i][0].insert(
-            np.square(value-ideal_equivalence[i][0]))
-            self.ideal_test_devia[i][1].insert(
-            np.square(value-ideal_equivalence[i][1]))
-            self.ideal_test_devia[i][2].insert(
-            np.square(value-ideal_equivalence[i][2]))
-            self.ideal_test_devia[i][3].insert(
-            np.square(value-ideal_equivalence[i][3]))
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[0]]):
+            #computes the squared deviation of each selected ideal dataset
+            #from the four train functions and then 
+            #normalizes the value by dividing by four so that we 
+            #compare to existing maximum deviation of fitted models
+            #and be able to have the criteria of their difference
+            # being within sqrt(2) possible.
+            selec_ideal_1_list.insert(i,
+            ((col_y1[i]-value)**2 + (col_y2[i]-value)**2 + (
+                col_y3[i]-value)**2 + (col_y4[i]-value)**2)/4)
             i = i+1
+        #print("selec_ideal_1_list.insert0", selec_ideal_1_list[0])
+        #each row in it, is mean of sum of squared deviation for 
+        # y1, y2, y3, y4 training dataset from the four 
+        # ideal function. We find mean to normalize it. And we 
+        #find deviation of each function from the ideal functions 
+        #because no guideline was given as to which of the four 
+        # ideal function should be used for y1, y2, y3, or y4
+        #in computing the deviation
+        self.ideal_train_devia.insert(0, selec_ideal_1_list)
+        i = 0
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[1]]):
+            #computes the squared deviation of each selected ideal dataset
+            #from the four train functions and then 
+            #normalizes the value by dividing by four so that we 
+            #compare to existing maximum deviation of fitted models
+            #and be able to have the criteria of their difference
+            # being within sqrt(2) possible.
+            selec_ideal_2_list.insert(i,
+            ((col_y1[i]-value)**2 + (col_y2[i]-value)**2 + (
+                col_y3[i]-value)**2 + (col_y4[i]-value)**2 )/4)
+            i = i+1
+        #print("selec_ideal_1_list.insert0", selec_ideal_1_list[0])
+        #each row in it, is mean of sum of squared deviation for 
+        # y1, y2, y3, y4 training dataset from the four 
+        # ideal function. We find mean to normalize it. And we 
+        #find deviation of each function from the ideal functions 
+        #because no guideline was given as to which of the four 
+        # ideal function should be used for y1, y2, y3, or y4
+        #in computing the deviation
+        self.ideal_train_devia.insert(1, selec_ideal_2_list)
+        i = 0
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[2]]):
+            #computes the squared deviation of each selected ideal dataset
+            #from the four train functions and then 
+            #normalizes the value by dividing by four so that we 
+            #compare to existing maximum deviation of fitted models
+            #and be able to have the criteria of their difference
+            # being within sqrt(2) possible.
+            devia = ((col_y1[i]-value)**2 + (col_y2[i]-value)**2 + (
+                col_y3[i]-value)**2 + (col_y4[i]-value)**2)/4
+            selec_ideal_3_list.insert(i, devia)
+            i = i+1
+        #print("selec_ideal_1_list.insert0", selec_ideal_1_list[0])
+        #each row in it, is mean of sum of squared deviation for 
+        # y1, y2, y3, y4 training dataset from the four 
+        # ideal function. We find mean to normalize it. And we 
+        #find deviation of each function from the ideal functions 
+        #because no guideline was given as to which of the four 
+        # ideal function should be used for y1, y2, y3, or y4
+        #in computing the deviation
+        self.ideal_train_devia.insert(2, selec_ideal_3_list)
+        i = 0
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[3]]):
+            #computes the squared deviation of each selected ideal dataset
+            #from the four train functions and then 
+            #normalizes the value by dividing by four so that we 
+            #compare to existing maximum deviation of fitted models
+            #and be able to have the criteria of their difference
+            # being within sqrt(2) possible.
+            selec_ideal_4_list.insert(i,
+            ((col_y1[i]-value)**2 + (col_y2[i]-value)**2 + (
+                col_y3[i]-value)**2 + (col_y4[i]-value)**2 )/4)
+            i = i+1
+        #print("selec_ideal_1_list.insert0", selec_ideal_1_list[0])
+        #each row in it, is mean of sum of squared deviation for 
+        # y1, y2, y3, y4 training dataset from the four 
+        # ideal function. We find mean to normalize it. And we 
+        #find deviation of each function from the ideal functions 
+        #because no guideline was given as to which of the four 
+        # ideal function should be used for y1, y2, y3, or y4
+        #in computing the deviation        
+        self.ideal_train_devia.insert(3, selec_ideal_4_list)
+        #write to a file
+        ideal_train_devia_df = pd.DataFrame(data={
+            self.four_ideal_func[0]+"_res":
+                self.ideal_train_devia[0],
+            self.four_ideal_func[1]+"_res":
+                self.ideal_train_devia[1],
+            self.four_ideal_func[2]+"_res":
+                self.ideal_train_devia[2],
+            self.four_ideal_func[3]+"_res":
+                self.ideal_train_devia[3]
+        })
+        data_wrangler = DataWrangler(ideal_train_devia_df)
+        data_wrangler.write_to_file(ideal_train_devia_df,"ideal_train_residuals.csv")
+        
     def determine_max_deviation(self):
         '''
         Determines the maximum deviation out of the four
@@ -135,22 +234,21 @@ class EvaluateModel(DetermineIdealFunctions):
         four selected ideal functions that is maximum out 
         of the four deviation values.
         '''
-        deviation = self.ideal_test_devia
-        col_x = self.test_df.loc[:,'x']
+        deviation = self.ideal_train_devia
+        col_x = self.train_df.loc[:,'x']
         i = 0
         for i in range(len(col_x)):
-            maximum = np.max(deviation[i][0], deviation[i][1],
-                         deviation[i][2], deviation[i][3])
+            maximum = np.max([deviation[0][i], deviation[1][i],
+                         deviation[2][i], deviation[3][i]])
             #extract the index of the of all deviation of 
             #four selected ideal functions from the test 
             #data for the specific value of x in consideration
             # that is equal to the maximum above 
             #Index is a list of indices
-            current_devia_row = [deviation[i][0], deviation[i][1],
-                                 deviation[i][2], deviation[i][3]]
+            current_devia_row = [deviation[0][i], deviation[1][i],
+                                 deviation[2][i], deviation[3][i]]
             index = [j for j, k in enumerate(current_devia_row) if k == maximum]
             self.max.insert(i, index)
-            i = i+1
     def map_ideal(self):
         '''
         A function that creates a 2-D list that houses the deviation of test dataset 
@@ -160,18 +258,31 @@ class EvaluateModel(DetermineIdealFunctions):
         dataset, and the row wise maximum deviation of the test dataset from the four
         selected ideal functions not being more than a sqrt(2).
         '''
-        i = 0
         j = 0
         col_x = self.test_df.loc[:,'x']
-        for i in range(len(col_x)):
-            dev = [0,0,0,0]
-            while j < len(self.max[i]):
-                diff = self.calculated_max_deviation - self.ideal_test_devia[
-                    j][self.max[i][j]]
-                if np.abs(diff) < np.sqrt(2):
-                    dev.insert(self.max[i][j],self.ideal_test_devia[i][
-                        self.max[i][j]])
-                    self.mapping.insert(i, dev)
+        for ind in self.max:
+            '''
+            The criteria of existing maximum deviation of the calculated 
+            regression does not exceed the largest deviation between training 
+            dataset (A) and the ideal function (C) chosen for it by more than 
+            factor sqrt(2) is dependent on how efficient our OLS class does the fitting,
+            if the fitting is done efficient, then existing maximum deviation would be 
+            less than largest deviation between training dataset (A) and the ideal 
+            function (C). So we test for which is larger and know which to subtract
+            from the other, so that we get a difference that would at least be less than 
+            sqrt(2)
+            '''
+            dev = [None,None,None,None]
+            for i in ind:
+                diff = 0
+                if self.existing_max_devia < self.ideal_train_devia[i][j]:
+                    diff = self.existing_max_devia - self.ideal_train_devia[i][j]
+                else:
+                    diff = self.ideal_train_devia[i][j] - self.existing_max_devia
+                if diff < np.sqrt(2):
+                    dev[i] = self.ideal_train_devia[i][j]
+            j = j+1
+            self.mapping.insert(j, dev)
     def construct_mapping_df(self):
         '''
         A function that creates a dataframe bearing the output of the mapping 
@@ -188,16 +299,18 @@ class EvaluateModel(DetermineIdealFunctions):
         ideal_3_devia = []
         ideal_4_devia = []
         no_of_ideal = []
-        for value in self.mapping:
-            ideal_1_devia.insert(i, value[0])
-            ideal_2_devia.insert(i, value[1])
-            ideal_3_devia.insert(i, value[2])
-            ideal_4_devia.insert(i, value[3])
-            no_of_ideal.insert(i, len(self.max[i]))
-            i = i+1
-        dictionary.update({self.four_ideal_func[0]:ideal_1_devia})
-        dictionary.update({self.four_ideal_func[1]:ideal_2_devia})
-        dictionary.update({self.four_ideal_func[2]:ideal_3_devia})
-        dictionary.update({self.four_ideal_func[3]:ideal_4_devia})
+        for value in self.test_df.loc[:,'x']:
+            index = self.train_df.index[self.train_df['x'] == value].tolist()
+            ideal_1_devia.insert(i, self.mapping[index[0]][0])
+            ideal_2_devia.insert(i, self.mapping[index[0]][1])
+            ideal_3_devia.insert(i, self.mapping[index[0]][2])
+            ideal_4_devia.insert(i, self.mapping[index[0]][3])
+            no_of_ideal.insert(i, len(self.max[index[0]]))
+        dictionary.update({"Delta_"+self.four_ideal_func[0]:ideal_1_devia})
+        dictionary.update({"Delta_"+self.four_ideal_func[1]:ideal_2_devia})
+        dictionary.update({"Delta_"+self.four_ideal_func[2]:ideal_3_devia})
+        dictionary.update({"Delta_"+self.four_ideal_func[3]:ideal_4_devia})
         dictionary.update({'Number_of_Ideal_Function': no_of_ideal})
-        self.mapped = pd.DataFrame(data=dict)    
+        self.mapped = pd.DataFrame(data=dictionary)
+        data_wrangler = DataWrangler(self.mapped)
+        data_wrangler.write_to_file(self.mapped, "mapping.csv")

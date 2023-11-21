@@ -2,8 +2,12 @@
 Imports the external modules needed for 
 the class
 '''
+import copy
 import numpy as np
+import pandas as pd
 from data_exploration.ols import OLS
+from data_exploration.data_wrangler import DataWrangler
+import config.config as cf
 class DetermineIdealFunctions(object):
     '''
     A simple DetermineIdealFunctions class.
@@ -15,6 +19,8 @@ class DetermineIdealFunctions(object):
         model.
         predicted_values(list): A 2-D list bearing the dataset generated from our 
         created model.
+        train_df(pandas.dataframe): A pandas dataframe object bearing the training
+        dataset.
         residuals(list): A list bearing the residuals of the linear regression 
         model created for y1, y2, y3, and y4
         res1(list): A list bearing the residuals of of the model we created with respect
@@ -62,14 +68,26 @@ class DetermineIdealFunctions(object):
         ols_ideal.load_data()
         ols_training = OLS(file_name2)
         ols_training.load_data()
+        data_wrangler = DataWrangler(ols_training.get_dataframe())
+        df = data_wrangler.handle_outliers('y3')
+        ols_training.dataframe = df
         ols_training.fit_regression()        
         self.df = ols_ideal.get_dataframe()
         self.residuals = ols_training.compute_residuals()
         self.predicted_values = ols_training.prepare_predicted_value()
+        self.train_df = ols_training.get_dataframe()
         self.res1 = np.square(self.residuals[0])
         self.res2 = np.square(self.residuals[1])
         self.res3 = np.square(self.residuals[2])
         self.res4 = np.square(self.residuals[3])
+        self.res_df = pd.DataFrame(data={
+            "res1": self.res1,
+            "res2": self.res2,
+            "res3": self.res3,
+            "res4": self.res4
+        })
+        data_wrangler = DataWrangler(self.res_df)
+        data_wrangler.write_to_file(data_wrangler.df_data, "residuals.csv")
         self.existing_max_devia = []   
         self.sum_of_deviation_val = [0,0,0,0]
         self.sum_of__ideal_deviation = []
@@ -95,17 +113,28 @@ class DetermineIdealFunctions(object):
             self.sum_of_deviation_val))
     def sum_of_deviation(self):
         '''
-        Computes the sum of squared deviation - residuals for y1, y2
-        y3 and y4 and updates the list sum_of_deviation_val
+        Computes the sum of squared deviation of the each fitted functions 
+        from the train dataset and takes the mean to normalize it, 
+        and updates the list sum_of_deviation_val
         '''
-        for value in self.res1:
-            self.sum_of_deviation_val[0] = self.sum_of_deviation_val[0] + np.square(value)
-        for value in self.res2:
-            self.sum_of_deviation_val[1] = self.sum_of_deviation_val[1] + np.square(value)
-        for value in self.res3:
-            self.sum_of_deviation_val[2] = self.sum_of_deviation_val[2] + np.square(value)
-        for value in self.res4:
-            self.sum_of_deviation_val[3] = self.sum_of_deviation_val[3] + np.square(value)
+        df_res = pd.read_csv(cf.INPUT_FILE_PATH+"residuals.csv")
+        sum=0
+        for value in df_res.loc[:,'res1']:
+            sum = sum + np.square(value)
+        self.sum_of_deviation_val[0] = sum
+        sum=0
+        for value in df_res.loc[:,'res2']:
+            sum = sum + np.square(value)
+        self.sum_of_deviation_val[1] = sum
+        sum=0
+        for value in df_res.loc[:,'res3']:
+            sum = sum + np.square(value)
+        self.sum_of_deviation_val[2] = sum
+        sum=0
+        for value in df_res.loc[:,'res4']:
+            sum = sum + np.square(value)
+        self.sum_of_deviation_val[3] = sum
+        
     def sum_of_devia_ideal_func(self):
         '''
         Computes the sum of deviation of each ideal function 
@@ -126,12 +155,19 @@ class DetermineIdealFunctions(object):
         training dataset.
         returns: It returns a list of the ideal functions.
         '''
-        ideal = ['','','','']
-        for i in range(4):
-            minimum = np.min(self.sum_of__ideal_deviation)
-            index = self.sum_of__ideal_deviation.index(minimum)
-            ideal[i] = "y"+str(index+1)
-            self.sum_of__ideal_deviation.remove(minimum)
+        
+        indices = sorted(range(len(self.sum_of__ideal_deviation)), key=lambda i:
+            self.sum_of__ideal_deviation[i])[:4]
+        ideal = ["y"+str(indices[0]+1),"y"+str(indices[1]+1),"y"+str(indices[2]+1),
+                "y"+str(indices[3]+1)] 
+        sel_ideal_df = pd.DataFrame(data={
+            ideal[0]: self.df.loc[:,ideal[0]],
+            ideal[1]: self.df.loc[:,ideal[1]],
+            ideal[2]: self.df.loc[:,ideal[2]],
+            ideal[3]: self.df.loc[:,ideal[3]]
+        })
+        data_wrangler = DataWrangler(sel_ideal_df)
+        data_wrangler.write_to_file(data_wrangler.df_data, "selected_ideal.csv")
         return ideal
 def compute_pred_ideal_devia(y_pred, y_ideal):
     '''

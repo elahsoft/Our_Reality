@@ -35,35 +35,35 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         Sets up the test via creating objects and variables needed
         for the running of the test
         '''
-        self.deter_ideal_func = DetermineIdealFunctions("ideal.csv", "train.csv")     
+        self.deter_ideal_func = DetermineIdealFunctions("ideal.csv", "train2.csv")     
         self.deter_ideal_func.sum_of_deviation()   
         self.deter_ideal_func.calculated_max_deviation()
         self.deter_ideal_func.sum_of_devia_ideal_func()
-        self.expected_sum_squared_devia = [22919981.35999242, 22923572.558442272, 
-                                           22823456.835509147, 22875195.478353556, 
-                                           23034275.95094429, 22936812.603422407, 
-                                           22936789.00249287, 22926759.56475184, 
-                                           22918753.12395203, 22762115.579261508, 
-                                           22736960.07590698, 22345168.939361874, 
-                                           22595699.229817934, 23122995.945057575, 
-                                           22995997.966678172, 19714632.752833806, 
-                                           27396746.54893075, 17755462.89598534, 
-                                           19649719.615861293, 18941958.314106748, 
-                                           194906724.09452176, 194906724.09452176, 
-                                           347780788.63685083, 863715779.0089693, 
-                                           2030252833.625338, 362341813.80526936, 
-                                           210134158.69836563, 195969881.56074643, 
-                                           216659330.9567933, 155400430.6438924, 
-                                           22736960.07590698, 22885205.137777787, 
-                                           22735765.38202372, 22917585.691204783, 
-                                           22832762.012879495, 22002905.29760578, 
-                                           23122995.945057575, 22924801.298539575, 
-                                           19708968.804526754, 22020613.73903049, 
-                                           22544625.3514451, 23318275.893438216, 
-                                           22899421.5793236, 22928515.062167894, 
-                                           22803066.898016, 22877164.19763894, 
-                                           22979847.895948198, 22926302.092695817, 
-                                           22919981.35999242, 22923768.71628605]
+        self.expected_sum_squared_devia = [3782.15559744031, 3833.065591154061, 
+                                           2822.7303639295114, 3238.5346494921537, 
+                                           5928.348227731232, 4030.0999556086645, 
+                                           4029.735680184478, 3879.151718512194, 
+                                           3764.992180678466, 2628.5454569444273, 
+                                           2643.7713848483763, 10314.753698349263, 
+                                           3774.9246018618496, 8330.541717926477, 
+                                           5089.368104525439, 574615.4321372602, 
+                                           687782.1617655145, 2399919.108523133, 
+                                           605267.3953701552, 1028996.8800476314, 
+                                           247293256.55195427, 247293256.55195427, 
+                                           249545274.4715565, 991413334.777765, 
+                                           2233309195.2556, 439793734.1351774, 
+                                           132399843.21973655, 248546588.5675877, 
+                                           272830336.9474602, 200265798.58495894, 
+                                           2643.7713848483763, 3345.3207709445696, 
+                                           2645.877477498237, 3748.7958808688118, 
+                                           2880.6081519534273, 29287.190718692167, 
+                                           8330.541717926477, 3850.73306482366, 
+                                           577243.285314628, 28005.126560787357, 
+                                           4629.401508848373, 15811.622185339631, 
+                                           3511.5691300409694, 3904.900991087008, 
+                                           2721.989939144335, 3258.865982329427, 
+                                           4771.519743029628, 3872.4840358652523, 
+                                           3782.15559744031, 3835.8775576715116]
     def test_sum_of_deviation(self):
         '''
         Tests the sum_of_deviation method.
@@ -72,8 +72,8 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         sinusoidal in shape - sine function
         '''
         self.assertEqual(self.deter_ideal_func.sum_of_deviation_val,
-                         [216.4744967687914, 218.35154938213591, 
-                          2020940685348972.8, 4.801266630283453],
+                         [1285.4770530972846, 1281.4513989704842, 
+                          0.0, 3619.8862663683417],
                          "The sum of squared deviation of each model "+
                          "created from the training dataset is actually computed")
     def test_calculated_max_deviation(self):
@@ -81,7 +81,7 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         Tests the calculated_max_deviation method
         '''
         self.assertEqual(self.deter_ideal_func.existing_max_devia,
-                         2020940685348972.8, "The maximum existing squared "+
+                         3619.8862663683417, "The maximum existing squared "+
                          "deviation between the training dataset and "+
                          "the model created is correctly determined")
     def test_sum_of_devia_ideal_func(self):

@@ -4,6 +4,7 @@ Imports the modules needed by the class
 import statsmodels.api as sm
 import pandas as pd
 import config.config as cf
+from data_exploration.data_wrangler import DataWrangler
 class OLS(object):
     """
     A simple Linear Regression Fitting Class that uses Ordinary Least 
@@ -101,5 +102,12 @@ class OLS(object):
         while i < 4:
             predicted_values.insert(i,self.model[i].predict(x_with_constant))
             i = i+1
+        dictionary = {"x":self.dataframe.loc[:,'x'],
+                      "y1_pred": predicted_values[0],
+                      "y2_pred": predicted_values[1],
+                      "y3_pred": predicted_values[2],
+                      "y4_pred": predicted_values[3]}
+        data_wrangler = DataWrangler(pd.DataFrame(data=dictionary))
+        data_wrangler.write_to_file(data_wrangler.df_data, "predictions.csv")
         return predicted_values
         

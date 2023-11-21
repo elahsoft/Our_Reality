@@ -2,6 +2,8 @@
 Imports all the modules needed by the class.
 '''
 import numpy as np
+import os
+import config.config as cf
 class DataWrangler(object):
     """
     A simple DataWrangler class.
@@ -13,20 +15,26 @@ class DataWrangler(object):
         self.upper_bound_outlier(Integer): An integer indicating the upper bound 
         determinant of outliers
     Methods:
-        shape_of_data(df_data): Returns the shape of the dataframe passed to it.
-        summary_statistics(column_data): Returns a summary statistics of pandas dataframe
+        shape_of_data(pandas.dataframe): Returns the shape of the dataframe passed to it.
+        summary_statistics(pandas.series): Returns a summary statistics of pandas dataframe
         passed to it.
-        find_missing_values(df_data): Returns a list of missing values (nan) by columns.
-        duplicated_rows(df_data): Returns duplicated rows
-        drop_duplicates(df_data): Returns a pandas dataframe with duplicated rows dropped.
-        fill_missing_values(df_data): Fills missing values (nan) in the dataframe with the mean 
+        find_missing_values(pandas.dataframe): Returns a list of missing values (nan) by columns.
+        duplicated_rows(pandas.dataframe): Returns duplicated rows
+        drop_duplicates(pandas.dataframe): Returns a pandas dataframe with duplicated rows dropped.
+        fill_missing_values(pandas.dataframe): Fills missing values (nan) in the dataframe with the mean 
         value of each column
-        find_outliers(df_column): Returns all values that are outliers in the numeric 
+        find_outliers(pandas.series): Returns all values that are outliers in the numeric 
         column passed to it.
         is_outlier(value): Returns the value if it is an outlier
-        handle_outliers(outliers, df_column): fills all entries in the dataframe 
+        handle_outliers(string): does a log transform of column to preserve the sinusoidal
+        nature and reduce the effect of outlier values. 
+        log_transform(float, string): Finds the natural logarithm of the sum of 
+        row value and o.1 and the max of the abs value of max of the row and abs value of 
+        min of the row.
         column passed to it, that are outliers with the mean value of the column.
-        sort_data(df_data): Sorts the dataframe by the 'x' column    
+        sort_data(pandas.dataframe): Sorts the dataframe by the 'x' column
+        write_to_file(pandas.dataframe, string): Write the wrangled dataframe to file 
+        for fitting to continue.
 
         Example:
             data_wrangler = DataWrangler(file_name="train.csv")
@@ -121,28 +129,31 @@ class DataWrangler(object):
             return value
         if value > self.upper_bound_outlier:
             return value
-    def handle_outliers(self, outliers, df_column):
+    def handle_outliers(self, column_id):
         '''
-        Replaces all outlier values in the dataframe column passed to it with
-        the mean of the values in the column. Checks if the number of datapoints that
-        are outliers is like 2% of the number of rows, it handles it, else it returns
-        the column without handling it.
-        outliers: A list of values considered to be outliers in the column
-        df_column extracted from the dataframe
-        df_column: The column extracted from the dataframe, that we want to 
-        replace outliers in it with the mean.
-        return: The Dataframe column with outliers replaced by the mean value
+        Handles outliers by adding the sum of the maximum absolute
+        values in the column and o.1 and taking the natural logarithm
+        of the output.
+        column_id: The id of the column in training dataset to handle
+        outliers
+        return: The Dataframe with outliers handled and the sinusoidal
+        nature of the column preserved.
         '''
-        percentage_of_outliers = len(outliers)/len(df_column) * 100
-        if percentage_of_outliers < 2 or percentage_of_outliers == 2:
-            mean = df_column.mean()
-            new_value = {}
-            for value in outliers:
-                new_value.update({value:mean})
-                df_column.replace(to_replace=new_value, inplace=True)
-                return df_column
-        else:
-            return df_column
+        self.df_data[column_id] = self.df_data[column_id].apply(self.log_transform, args=(column_id,))
+        return self.df_data
+    def log_transform(self, data, column_id):
+        '''
+        Finds the natural logarithm of the sum of 
+        row value and o.1 and the max of the abs value 
+        of max of the row and abs value of min of the row
+        data: The data point to be transformed
+        column_id: The dataframe column to be transformed.
+        '''
+        unsigned_max = np.abs(np.max(self.df_data.loc[:,column_id]))
+        unsigned_min = np.abs(np.min(self.df_data.loc[:,column_id]))
+        maximum = np.max([unsigned_max, unsigned_min])
+        new_value = np.log(data + maximum +0.1)
+        return new_value
     def sort_data(self):
         '''
         Sorts the dataframe passed to it by the column x
@@ -150,4 +161,12 @@ class DataWrangler(object):
         '''
         sorted_df_data = self.df_data.sort_values(by='x')
         return sorted_df_data
+    def write_to_file(self, df, output_file):
+        '''
+        write the wrangled dataframe to file 
+        for fitting to continue.
+        df: The dataframe to be written to file
+        output_file: The file name of the output file
+        '''
+        df.to_csv(os.path.join(cf.INPUT_FILE_PATH, output_file), index=False)
 
