@@ -3,26 +3,20 @@ Imports the modules needed by the class
 '''
 import statsmodels.api as sm
 import pandas as pd
-import config.config as cf
-from data_exploration.data_wrangler import DataWrangler
-class OLS(object):
+import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
+from utility.dataframe_utility import DataFrameUtility
+class OLS(DataFrameUtility):
     """
     A simple Linear Regression Fitting Class that uses Ordinary Least 
-    Square Method for the fitting.
+    Square Method for the fitting. It is a child class of DataFrameUtility
     
     Attributes:
-        file_name(string): The filename of the file bearing the dataset
-        to be fitted a linear regression model on using Ordinary Least Square
-        Regression method.
-        df (pandas.dataframe): The dataframe  bearing the dataset, which we want
-        fit a Linear Regression Model over using Ordinary Least Square Method.
         model(list): A list of models created for y1, y2, y3 and y4
         residuals(list): A  list bearing the residuals of y1, y2, y3, y4 with 
         regards to the training dataset used in creating the model
         
     Methods:
-        load_data(): Loads the dataset from the file into a pandas dataframe.
-        get_dataframe(): gets the dataframe created with the file passed to the class
         fit_regression(): Fits a linear regression model over the data.
         compute_residuals(): Computes the residuals of the dataset
         prepare_predicted_value(): Returns a list bearing the dataset of predictions from
@@ -36,78 +30,111 @@ class OLS(object):
     def __init__(self,file_name):
         '''
         Constructor for the OLS Class
-        df: The dataframe created from the dataset to be fitted to a
-        Linear Regression Model
+        file_name(string): The filename of the file bearing the dataset
+        to be fitted a linear regression model on using Ordinary Least Square
+        Regression method.
         '''
-        self.dataframe = None
-        self.file_name = file_name
+        super().__init__(file_name)
+        super().load_data()
+        self.dataframe = super().get_dataframe()
         self.model = []
         self.residuals = []
-    def load_data(self):
-        '''
-        Loads the file received by constructor to pandas dataframe
-        '''
-        df_data = None
-        try:
-            df_data = pd.read_csv(filepath_or_buffer=cf.INPUT_FILE_PATH+self.file_name,
-                                  sep=",", encoding="latin1")
-        except FileNotFoundError:
-            print(f"Error: The file '{self.file_name}' was not found")
-        except pd.errors.EmptyDataError:
-            print(f"Error: The file '{self.file_name}' is empty")
-        except pd.errors.ParserError as e:
-            print(f"Error while parsing csv: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred {e}")
-        finally:
-            pass
-        self.dataframe = df_data
-    def get_dataframe(self):
-        '''
-        gets the dataframe created with the file passed to the class
-        returns: A dataframe
-        '''
-        return self.dataframe
-    def fit_regression(self):
+    def fit_regression(self, add_polynomial_term):
         '''
         fit_regression Method for the OLS Class
         returns: The resultant model from the fitting done.
+        add_polynomial_term: A boolean list indicating if a polynomial term should be 
+        before the fitting in order to capture complexity.
         '''
-        #done to avoid having a zero intercept
-        x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])
-        self.model.insert(0, sm.OLS(self.dataframe.loc[:,'y1'], x_with_constant).fit())
-        self.model.insert(1, sm.OLS(self.dataframe.loc[:,'y2'], x_with_constant).fit())
-        self.model.insert(2, sm.OLS(self.dataframe.loc[:,'y3'], x_with_constant).fit())
-        self.model.insert(3, sm.OLS(self.dataframe.loc[:,'y4'], x_with_constant).fit())
+        #Add polynomial features (degree = 3) to introduce complexity
+        degree = 3
+        alpha = 0.1 #Regularization parameter
+        if add_polynomial_term[0] is True:
+            poly = PolynomialFeatures(degree=degree, include_bias=False)
+            x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
+            #done to avoid having a zero intercept
+            x_with_constant = sm.add_constant(x_poly)  
+            model = sm.OLS(self.dataframe.loc[:,'y1'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0)
+            self.model.insert(0, model)
+        else:
+            x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])                     
+            self.model.insert(0, sm.OLS(self.dataframe.loc[:,'y1'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0))
+        if add_polynomial_term[1] is True:
+            #Add polynomial features (degree = 10) to introduce complexity
+            poly = PolynomialFeatures(degree=degree, include_bias=False)
+            x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
+            #done to avoid having a zero intercept
+            x_with_constant = sm.add_constant(x_poly)
+            self.model.insert(1, sm.OLS(self.dataframe.loc[:,'y2'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0))
+        else:
+            x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])                     
+            self.model.insert(1, sm.OLS(self.dataframe.loc[:,'y2'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0))
+        if add_polynomial_term[2] is True:
+            poly = PolynomialFeatures(degree=degree, include_bias=False)
+            x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
+            #done to avoid having a zero intercept
+            x_with_constant = sm.add_constant(x_poly)
+            self.model.insert(2, sm.OLS(self.dataframe.loc[:,'y3'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0) )
+        else:
+            x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])                     
+            self.model.insert(2, sm.OLS(self.dataframe.loc[:,'y3'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0))
+        if add_polynomial_term[3] is True:            
+            poly = PolynomialFeatures(degree=degree, include_bias=False)
+            x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
+            #done to avoid having a zero intercept
+            x_with_constant = sm.add_constant(x_poly)                     
+            self.model.insert(3, sm.OLS(self.dataframe.loc[:,'y4'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0))
+        else:
+            x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])                     
+            self.model.insert(3, sm.OLS(self.dataframe.loc[:,'y4'], 
+                                        x_with_constant).fit_regularized(alpha=alpha, L1_wt=0.0))
         return self.model
-    def compute_residuals(self):
+    def compute_residuals(self, add_polynomial_term):
         '''
-        computes the residuals of the regression model created
+        computes the residuals of the regression model created        
+        add_polynomial_term: denotes models that polynomial terms
+        were added to during the fitting.
         returns: The residuals
         '''
-        self.residuals.insert(0, self.model[0].resid)
-        self.residuals.insert(1, self.model[1].resid)
-        self.residuals.insert(2, self.model[2].resid)
-        self.residuals.insert(3, self.model[3].resid)
+        predicted_values = self.prepare_predicted_value(add_polynomial_term)
+        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y1'],predicted_values[0]))
+        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y2'],predicted_values[1]))
+        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y3'],predicted_values[2]))
+        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y4'],predicted_values[3]))
         return self.residuals
-    def prepare_predicted_value(self):
+    def prepare_predicted_value(self, add_polynomial_term):
         '''
         Prepares a 2-D list of predicted values
         returns: a 2-D list with four columns, each column
         bearing the predicted value of y1, y2, y3, and y4
+        add_polynomial_term: denotes models that polynomial terms
+        were added to during the fitting.
         '''
         predicted_values = []
-        x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])
         i=0
         while i < 4:
-            predicted_values.insert(i,self.model[i].predict(x_with_constant))
+            if add_polynomial_term[i] is True:
+                poly = PolynomialFeatures(degree=3, include_bias=False)
+                x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
+                #done to avoid having a zero intercept
+                x_with_constant = sm.add_constant(x_poly)
+                predicted_values.insert(i, self.model[i].predict(x_with_constant))
+            else:
+                 x_with_constant = sm.add_constant(self.dataframe.loc[:,'x'])
+                 predicted_values.insert(i, self.model[i].predict(x_with_constant))
             i = i+1
         dictionary = {"x":self.dataframe.loc[:,'x'],
                       "y1_pred": predicted_values[0],
                       "y2_pred": predicted_values[1],
                       "y3_pred": predicted_values[2],
                       "y4_pred": predicted_values[3]}
-        data_wrangler = DataWrangler(pd.DataFrame(data=dictionary))
-        data_wrangler.write_to_file(data_wrangler.df_data, "predictions.csv")
+        super().write_to_file(pd.DataFrame(data=dictionary), "predictions.csv")
         return predicted_values
         

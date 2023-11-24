@@ -2,23 +2,21 @@
 Imports the external modules needed for 
 the class
 '''
-import copy
 import numpy as np
 import pandas as pd
 from data_exploration.ols import OLS
-from data_exploration.data_wrangler import DataWrangler
 import config.config as cf
-class DetermineIdealFunctions(object):
+from utility.dataframe_utility import DataFrameUtility
+class DetermineIdealFunctions(DataFrameUtility):
     '''
     A simple DetermineIdealFunctions class.
     A class that  determines the four ideal functions out of the 50 
-    ideal functions in the dataset ideal.csv.
+    ideal functions in the dataset ideal.csv. A child class of DataFrameUtility
     Attributes:
         df(pandas.dataframe): A pandas dataframe object bearing the dataset of 
         ideal functions, that we are to determine the four best for our created
         model.
-        predicted_values(list): A 2-D list bearing the dataset generated from our 
-        created model.
+        train(list): A 2-D list bearing the training dataset for y1, y2, y3 and y4.
         train_df(pandas.dataframe): A pandas dataframe object bearing the training
         dataset.
         residuals(list): A list bearing the residuals of the linear regression 
@@ -38,8 +36,6 @@ class DetermineIdealFunctions(object):
         sum_of__ideal_deviation(list): A list bearing the sum of squared deviation of 
         each ideal function from the four predictive model
     Methods:
-        get_ideal_dataframe():Returns the dataframe of the ideal functions dataset
-        loaded
         get_existing_max_devia():Returns the exisiting maximum deviation of the
         created model from the training dataset
         sum_of_deviations(): computes the sum of squared residuals for the different
@@ -48,12 +44,12 @@ class DetermineIdealFunctions(object):
         maximum sum of deviation - existing maximum deviation of the calculated
         regression.
         sum_of_devia_ideal_func(): determines the average sum of squared deviation of the
-        predictions of the models created from each ideal function passed to it.
+        training dataset from each ideal function passed to it.
         determine _four_ideal(): determines the 4 ideal functions with the least sum of 
         deviation  
     Function:
-        compute_pred_ideal_devia(y_pred, y_ideal): computes the deviation of ideal
-        function dataset y_ideal from the prediction dataset y_pred
+        compute_train_ideal_devia(y_train, y_ideal): computes the deviation of ideal
+        function dataset y_ideal from the training dataset y_train
     '''
     def __init__(self, file_name1, file_name2):
         '''
@@ -64,18 +60,18 @@ class DetermineIdealFunctions(object):
         create the model for which four best ideal functions is to
         be determined
         '''
-        ols_ideal = OLS(file_name1)
-        ols_ideal.load_data()
-        ols_training = OLS(file_name2)
-        ols_training.load_data()
-        data_wrangler = DataWrangler(ols_training.get_dataframe())
-        df = data_wrangler.handle_outliers('y3')
-        ols_training.dataframe = df
-        ols_training.fit_regression()        
-        self.df = ols_ideal.get_dataframe()
-        self.residuals = ols_training.compute_residuals()
-        self.predicted_values = ols_training.prepare_predicted_value()
-        self.train_df = ols_training.get_dataframe()
+        super().__init__(file_name1)
+        super().load_data()
+        ols = OLS(file_name2)
+        ols.load_data()
+        ols.fit_regression([True, True, True, True])      
+        self.df = super().get_dataframe()
+        self.residuals = ols.compute_residuals([True, True, True, True])
+        self.train = [ols.dataframe.loc[:,'y1'],
+                      ols.dataframe.loc[:,'y2'],
+                      ols.dataframe.loc[:,'y3'],
+                      ols.dataframe.loc[:,'y4']]
+        self.train_df = ols.get_dataframe()
         self.res1 = np.square(self.residuals[0])
         self.res2 = np.square(self.residuals[1])
         self.res3 = np.square(self.residuals[2])
@@ -86,9 +82,8 @@ class DetermineIdealFunctions(object):
             "res3": self.res3,
             "res4": self.res4
         })
-        data_wrangler = DataWrangler(self.res_df)
-        data_wrangler.write_to_file(data_wrangler.df_data, "residuals.csv")
-        self.existing_max_devia = []   
+        super().write_to_file(self.res_df, "residuals.csv")
+        self.existing_max_devia = []
         self.sum_of_deviation_val = [0,0,0,0]
         self.sum_of__ideal_deviation = []
     def get_ideal_dataframe(self):
@@ -118,44 +113,42 @@ class DetermineIdealFunctions(object):
         and updates the list sum_of_deviation_val
         '''
         df_res = pd.read_csv(cf.INPUT_FILE_PATH+"residuals.csv")
-        sum=0
+        sum_value=0
         for value in df_res.loc[:,'res1']:
-            sum = sum + np.square(value)
-        self.sum_of_deviation_val[0] = sum
-        sum=0
+            sum_value = sum_value + np.square(value)
+        self.sum_of_deviation_val[0] = sum_value
+        sum_value=0
         for value in df_res.loc[:,'res2']:
-            sum = sum + np.square(value)
-        self.sum_of_deviation_val[1] = sum
-        sum=0
+            sum_value = sum_value + np.square(value)
+        self.sum_of_deviation_val[1] = sum_value
+        sum_value=0
         for value in df_res.loc[:,'res3']:
-            sum = sum + np.square(value)
-        self.sum_of_deviation_val[2] = sum
-        sum=0
+            sum_value = sum_value + np.square(value)
+        self.sum_of_deviation_val[2] = sum_value
+        sum_value=0
         for value in df_res.loc[:,'res4']:
-            sum = sum + np.square(value)
-        self.sum_of_deviation_val[3] = sum
+            sum_value = sum_value + np.square(value)
+        self.sum_of_deviation_val[3] = sum_value
         
     def sum_of_devia_ideal_func(self):
         '''
         Computes the sum of deviation of each ideal function 
-        from our prediction y1, y2, y3, and y4 using 
+        from our training dataset y1, y2, y3, and y4 using 
         the compute deviation function below
         '''
         for j in range(50):
             column = 'y'+str(j+1)
             ideal = self.df.loc[:,column]
-            sum_of_squared_deviation = compute_pred_ideal_devia(
-                np.array(self.predicted_values), np.array(ideal))
+            sum_of_squared_deviation = compute_train_ideal_devia(
+                np.array(self.train), np.array(ideal))
             self.sum_of__ideal_deviation.insert(j, sum_of_squared_deviation)
     def determine_four_ideal(self):
         '''
         Determines the best four ideal functions using the
         sum of deviation of each ideal function from the 
-        predicted dataset from our model created using the 
         training dataset.
         returns: It returns a list of the ideal functions.
         '''
-        
         indices = sorted(range(len(self.sum_of__ideal_deviation)), key=lambda i:
             self.sum_of__ideal_deviation[i])[:4]
         ideal = ["y"+str(indices[0]+1),"y"+str(indices[1]+1),"y"+str(indices[2]+1),
@@ -166,23 +159,22 @@ class DetermineIdealFunctions(object):
             ideal[2]: self.df.loc[:,ideal[2]],
             ideal[3]: self.df.loc[:,ideal[3]]
         })
-        data_wrangler = DataWrangler(sel_ideal_df)
-        data_wrangler.write_to_file(data_wrangler.df_data, "selected_ideal.csv")
+        super().write_to_file(sel_ideal_df, "selected_ideal.csv")
         return ideal
-def compute_pred_ideal_devia(y_pred, y_ideal):
+def compute_train_ideal_devia(y_train, y_ideal):
     '''
     Determines the sum of squared deviation of the ideal 
-    function dataset y_ideal from the prediction dataset y_pred.
+    function dataset y_ideal from the train dataset y_train.
     y_ideal: The ideal function dataset to compute its deviation from the 
-    prediction dataset
-    y_pred: The prediction dataset to be used to compute the deviation
+    training dataset
+    y_train: The training dataset to be used to compute the deviation
     of y_ideal dataset from it.
     returns: the sum of deviation
     '''
     temp_sum = 0
     total_sum = 0
     i =0
-    for m in y_pred:
+    for m in y_train:
         for value in y_ideal:
             deviation = np.square(value-m[i])
             temp_sum = temp_sum + deviation
@@ -190,16 +182,4 @@ def compute_pred_ideal_devia(y_pred, y_ideal):
         total_sum = total_sum + deviation
         temp_sum = 0
         i=0
-    return total_sum
-        
-    
-        
-    
-    
-        
-        
-        
-        
-        
-        
-        
+    return total_sum  

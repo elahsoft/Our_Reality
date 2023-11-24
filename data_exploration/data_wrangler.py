@@ -2,11 +2,10 @@
 Imports all the modules needed by the class.
 '''
 import numpy as np
-import os
-import config.config as cf
-class DataWrangler(object):
+from utility.dataframe_utility import DataFrameUtility
+class DataWrangler(DataFrameUtility):
     """
-    A simple DataWrangler class.
+    A simple DataWrangler class. A child class of DataFrameUtility.
     Attributes:
         df_data(pandas.dataframe): The pandas dataframe object bearing the dataset 
         to be wrangled
@@ -38,18 +37,20 @@ class DataWrangler(object):
 
         Example:
             data_wrangler = DataWrangler(file_name="train.csv")
-            df_data = data_wrangler.load_data()
+            df_data = data_wrangler.get_dataframe()
             print(df_data.head(5))  # Output: The first five rows of the train dataset
     """
-    def __init__(self, df_data):
+    def __init__(self, file_name):
         '''
         Constructor for the DataWrangler Class
-        df_data: The dataframe for wrangling
+        file_name: The file name of the file bearing the dataset
+        for wrangling
         '''
-        self.df_data = df_data
+        super().__init__(file_name)
+        super().load_data()
+        self.df_data = super().get_dataframe()
         self.lower_bound_outlier = 0
         self.upper_bound_outlier = 0
-   
     def shape_of_data(self):
         '''
         Computes the shape of the dataframe passed to it
@@ -161,12 +162,3 @@ class DataWrangler(object):
         '''
         sorted_df_data = self.df_data.sort_values(by='x')
         return sorted_df_data
-    def write_to_file(self, df, output_file):
-        '''
-        write the wrangled dataframe to file 
-        for fitting to continue.
-        df: The dataframe to be written to file
-        output_file: The file name of the output file
-        '''
-        df.to_csv(os.path.join(cf.INPUT_FILE_PATH, output_file), index=False)
-

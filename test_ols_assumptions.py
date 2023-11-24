@@ -43,7 +43,7 @@ class TestOLSAssumptions(unittest.TestCase):
         self.ols.load_data()
         self.data_wrangler = DataWrangler(self.ols.dataframe)
         self.df_data = self.data_wrangler.df_data
-        self.ols_assump = OLSAssumptions("train.csv")
+        self.ols_assump = OLSAssumptions("train.csv", [False, False, False, False])
     def test_check_heterocedasticity(self):
         '''
         Tests the check_heterocedasticity method.

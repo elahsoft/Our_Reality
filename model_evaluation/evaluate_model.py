@@ -77,7 +77,6 @@ class EvaluateModel(DetermineIdealFunctions):
             self.get_ideal_dataframe().loc[:,'x'])
         self.four_ideal_func = super().determine_four_ideal()
         self.ols_test = OLS(file_name3)
-        self.ols_test.load_data()
         self.test_df = self.ols_test.dataframe
         self.mapping = []
         self.max = []
@@ -128,7 +127,7 @@ class EvaluateModel(DetermineIdealFunctions):
         selec_ideal_3_list = []
         selec_ideal_4_list = []
         i = 0
-        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[0]]):
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[0]].astype(float)):
             #computes the squared deviation of each selected ideal dataset
             #from the four train functions and then 
             #normalizes the value by dividing by four so that we 
@@ -149,7 +148,7 @@ class EvaluateModel(DetermineIdealFunctions):
         #in computing the deviation
         self.ideal_train_devia.insert(0, selec_ideal_1_list)
         i = 0
-        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[1]]):
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[1]].astype(float)):
             #computes the squared deviation of each selected ideal dataset
             #from the four train functions and then 
             #normalizes the value by dividing by four so that we 
@@ -170,7 +169,7 @@ class EvaluateModel(DetermineIdealFunctions):
         #in computing the deviation
         self.ideal_train_devia.insert(1, selec_ideal_2_list)
         i = 0
-        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[2]]):
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[2]].astype(float)):
             #computes the squared deviation of each selected ideal dataset
             #from the four train functions and then 
             #normalizes the value by dividing by four so that we 
@@ -191,7 +190,7 @@ class EvaluateModel(DetermineIdealFunctions):
         #in computing the deviation
         self.ideal_train_devia.insert(2, selec_ideal_3_list)
         i = 0
-        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[3]]):
+        for _, value in enumerate(self.ideal_dataset.loc[:,self.four_ideal_func[3]].astype(float)):
             #computes the squared deviation of each selected ideal dataset
             #from the four train functions and then 
             #normalizes the value by dividing by four so that we 
@@ -259,7 +258,6 @@ class EvaluateModel(DetermineIdealFunctions):
         selected ideal functions not being more than a sqrt(2).
         '''
         j = 0
-        col_x = self.test_df.loc[:,'x']
         for ind in self.max:
             '''
             The criteria of existing maximum deviation of the calculated 

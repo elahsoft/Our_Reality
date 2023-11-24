@@ -7,9 +7,9 @@ from statsmodels.stats.diagnostic import het_breuschpagan
 from statsmodels.stats.stattools import durbin_watson
 from statsmodels.stats.diagnostic import linear_rainbow
 from data_exploration.ols import OLS
-class OLSAssumptions(object):
+class OLSAssumptions(OLS):
     """
-    A simple OLSAssumptions class.
+    A simple OLSAssumptions class. It is a child class of OLS.
     Attributes:
         file_name (string): The file name of the file bearing the dataset, which we want
         to test if it fulfills all the characteristics of a dataset that can be modelled
@@ -39,17 +39,20 @@ class OLSAssumptions(object):
             linearity_status = ols_assumptions.check_linearity()
             print(linearity_status)  # Output:
     """
-    def __init__(self, file_name):
+    def __init__(self, file_name, add_polynomial_term):
         '''
         Constructor for the OLSAssumptions Class
         file_name: The file_name of the file bearing the dataset to be checked for it's
         fulfillment of OLS assumptions.
+        add_polynomial_term: A boolean list indicating if a polynomial term should be 
+        before the fitting in order to capture complexity.
         '''
-        self.ols = OLS(file_name)
-        self.ols.load_data()
-        self.prepare_predicted_value = self.ols.dataframe
-        self.model =  self.ols.fit_regression()
-        self.residuals = self.ols.compute_residuals()
+        super().__init__(file_name)
+        super().load_data()
+        self.model =  super().fit_regression(add_polynomial_term)
+        self.predicted_value = super().prepare_predicted_value(add_polynomial_term)
+        self.residuals = super().compute_residuals(add_polynomial_term)
+        self.dataframe = super().get_dataframe()
         self.dw_statistics = None
         self.p_value = None
         self.jb_p_value = None
@@ -60,13 +63,13 @@ class OLSAssumptions(object):
         returns: A Boolean list indicating the heterocedascity of the residuals
         '''
         _, p_value0,_,_ = het_breuschpagan(self.residuals[0],
-                                           sm.add_constant(self.ols.dataframe.loc[:,'x']))
+                                           sm.add_constant(self.dataframe.loc[:,'x']))
         _, p_value1,_,_ = het_breuschpagan(self.residuals[1],
-                                           sm.add_constant(self.ols.dataframe.loc[:,'x']))
+                                           sm.add_constant(self.dataframe.loc[:,'x']))
         _, p_value2,_,_ = het_breuschpagan(self.residuals[2],
-                                           sm.add_constant(self.ols.dataframe.loc[:,'x']))
+                                           sm.add_constant(self.dataframe.loc[:,'x']))
         _, p_value3,_,_ = het_breuschpagan(self.residuals[3],
-                                           sm.add_constant(self.ols.dataframe.loc[:,'x']))
+                                           sm.add_constant(self.dataframe.loc[:,'x']))
         self.p_value = [p_value0, p_value1, p_value2, p_value3]
         result = [False, False, False, False] #Is Homocedastic and so no transformation needed
         if p_value0 < 0.05:
@@ -149,6 +152,8 @@ class OLSAssumptions(object):
         #Y1 Scatter Plot of Residuals Against Fitted Values
         axes[0,0].scatter(self.model[0].fittedvalues, self.residuals[0], color='red',
                           label="Y1 Residuals Against Fitted Values")
+        #Horizontal line at y=0
+        axes[0,0].axhline(y=0, color='black', linestyle='--', linewidth=1)
         axes[0,0].set_title('Y1 Scatter Plot of Residuals Against Fitted Values')
         plt.xlabel('Fitted Values')
         plt.ylabel('Residuals')
@@ -156,6 +161,8 @@ class OLSAssumptions(object):
         #Y2 Scatter Plot of Residuals Against Fitted Values
         axes[0,1].scatter(self.model[1].fittedvalues, self.residuals[1], color='blue',
                           label="Y2 Residuals Against Fitted Values")
+        #Horizontal line at y=0
+        axes[0,1].axhline(y=0, color='black', linestyle='--', linewidth=1)
         axes[0,1].set_title('Y2 Scatter Plot of Residuals Against Fitted Values')
         plt.xlabel('Fitted Values')
         plt.ylabel('Residuals')
@@ -163,6 +170,8 @@ class OLSAssumptions(object):
         #Y3 Scatter Plot of Residuals Against Fitted Values
         axes[1,0].scatter(self.model[2].fittedvalues, self.residuals[2], color='green',
                           label="Y3 Residuals Against Fitted Values")
+        #Horizontal line at y=0
+        axes[1,0].axhline(y=0, color='black', linestyle='--', linewidth=1)
         axes[1,0].set_title('Y3 Scatter Plot of Residuals Against Fitted Values')
         plt.xlabel('Fitted Values')
         plt.ylabel('Residuals')
@@ -170,37 +179,43 @@ class OLSAssumptions(object):
         #Y4 Scatter Plot of Residuals Against Fitted Values
         axes[1,1].scatter(self.model[3].fittedvalues, self.residuals[3], color='purple',
                           label="Y4 Residuals Against Fitted Values")
+        #Horizontal line at y=0
+        axes[1,1].axhline(y=0, color='black', linestyle='--', linewidth=1)
         axes[1,1].set_title('Y4 Scatter Plot of Residuals Against Fitted Values')
         plt.xlabel('Fitted Values')
         plt.ylabel('Residuals')
         axes[1,1].legend()
         #Adjust layout to prevent overlap
         plt.tight_layout()
-        plt.show()       
-        #Use rainbow test to further check for linearity assumption
-        _,rainbow_p_value1 = linear_rainbow(self.model[0])
-        _,rainbow_p_value2 = linear_rainbow(self.model[1])
-        _,rainbow_p_value3 = linear_rainbow(self.model[2])
-        _,rainbow_p_value4 = linear_rainbow(self.model[3])
-        self.rainbow_p_value = [rainbow_p_value1, rainbow_p_value2,
-                                rainbow_p_value3, rainbow_p_value4]
+        plt.show()
         result = [True, True, True, True] #Linearity assumed initially
-        #Indication of Non-linearity, so we may try transforming variables
-        if rainbow_p_value1 < 0.05:
-            result.pop(0)
-            result.insert(0, False)
-        #Indication of Non-linearity, so we may try transforming variables
-        if rainbow_p_value2 < 0.05:
-            result.pop(0)
-            result.insert(0, False)
-        #Indication of Non-linearity, so we may try transforming variables
-        if rainbow_p_value3 < 0.05:
-            result.pop(0)
-            result.insert(0, False)
-        #Indication of Non-linearity, so we may try transforming variables
-        if rainbow_p_value4 < 0.05:
-            result.pop(0)
-            result.insert(0, False)
+        try:
+            #Use rainbow test to further check for linearity assumption
+            _,rainbow_p_value1 = linear_rainbow(self.model[0])
+            _,rainbow_p_value2 = linear_rainbow(self.model[1])
+            _,rainbow_p_value3 = linear_rainbow(self.model[2])
+            _,rainbow_p_value4 = linear_rainbow(self.model[3])
+            self.rainbow_p_value = [rainbow_p_value1, rainbow_p_value2,
+                                    rainbow_p_value3, rainbow_p_value4]
+            #Indication of Non-linearity, so we may try transforming variables
+            if rainbow_p_value1 < 0.05:
+                result.pop(0)
+                result.insert(0, False)
+            #Indication of Non-linearity, so we may try transforming variables
+            if rainbow_p_value2 < 0.05:
+                result.pop(0)
+                result.insert(0, False)
+            #Indication of Non-linearity, so we may try transforming variables
+            if rainbow_p_value3 < 0.05:
+                result.pop(0)
+                result.insert(0, False)
+            #Indication of Non-linearity, so we may try transforming variables
+            if rainbow_p_value4 < 0.05:
+                result.pop(0)
+                result.insert(0, False)
+        except TypeError as te:
+            print(f"An unexpected error occurred {te}")
+        
         return result
     def check_independence(self):
         '''
@@ -263,6 +278,6 @@ class OLSAssumptions(object):
         axes[1,1].legend()
         #Adjust layout to prevent overlap
         plt.tight_layout()
-        plt.show()     
+        plt.show() 
         return result
         
