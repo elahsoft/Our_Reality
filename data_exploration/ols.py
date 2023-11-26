@@ -105,9 +105,9 @@ class OLS(DataFrameUtility):
         '''
         predicted_values = self.prepare_predicted_value(add_polynomial_term)
         self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y1'],predicted_values[0]))
-        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y2'],predicted_values[1]))
-        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y3'],predicted_values[2]))
-        self.residuals.insert(0, np.subtract(self.dataframe.loc[:,'y4'],predicted_values[3]))
+        self.residuals.insert(1, np.subtract(self.dataframe.loc[:,'y2'],predicted_values[1]))
+        self.residuals.insert(2, np.subtract(self.dataframe.loc[:,'y3'],predicted_values[2]))
+        self.residuals.insert(3, np.subtract(self.dataframe.loc[:,'y4'],predicted_values[3]))
         return self.residuals
     def prepare_predicted_value(self, add_polynomial_term):
         '''

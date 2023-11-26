@@ -77,10 +77,10 @@ class DetermineIdealFunctions(DataFrameUtility):
         self.res3 = np.square(self.residuals[2])
         self.res4 = np.square(self.residuals[3])
         self.res_df = pd.DataFrame(data={
-            "res1": self.res1,
-            "res2": self.res2,
-            "res3": self.res3,
-            "res4": self.res4
+            "res1": self.residuals[0],
+            "res2": self.residuals[1],
+            "res3": self.residuals[2],
+            "res4": self.residuals[3]
         })
         super().write_to_file(self.res_df, "residuals.csv")
         self.existing_max_devia = []
@@ -104,8 +104,11 @@ class DetermineIdealFunctions(DataFrameUtility):
         deviation of each predictive model created
         from the training dataset
         '''
+        #Divided by the number of rows of training dataset to normalize
+        #the value for comparison with maximum deviation of selected
+        #ideal functions from the test data.
         self.existing_max_devia = np.max(np.array(
-            self.sum_of_deviation_val))
+            self.sum_of_deviation_val))/400
     def sum_of_deviation(self):
         '''
         Computes the sum of squared deviation of the each fitted functions 
@@ -149,6 +152,7 @@ class DetermineIdealFunctions(DataFrameUtility):
         training dataset.
         returns: It returns a list of the ideal functions.
         '''
+        #sorts the list and picks the four minimum values
         indices = sorted(range(len(self.sum_of__ideal_deviation)), key=lambda i:
             self.sum_of__ideal_deviation[i])[:4]
         ideal = ["y"+str(indices[0]+1),"y"+str(indices[1]+1),"y"+str(indices[2]+1),
@@ -179,7 +183,10 @@ def compute_train_ideal_devia(y_train, y_ideal):
             deviation = np.square(value-m[i])
             temp_sum = temp_sum + deviation
             i = i+1
-        total_sum = total_sum + deviation
+        total_sum = total_sum + temp_sum
         temp_sum = 0
         i=0
+        #To normalize, since the sum was the sum of squared deviation between ideal function 
+        # in consideration and the four training functions y1, y2, y3, and y4
+        total_sum = total_sum/4
     return total_sum  

@@ -36,9 +36,6 @@ class EvaluateModel(DetermineIdealFunctions):
         ideal_2_deviation, ideal_3_deviation, ideal_4_deviation, Number_of_Ideal_Function 
         
     Methods:
-        extract_selected_ideal_data(): Extracts the corresponding selected four ideal function 
-        equivalents of the train dataset. returns: a 2-D bearing the corresponding selected 
-        four ideal function equivalents of the train dataset.
         compute_train_devia_from_ideal(list): Computes the squared deviation of the train dataset
         from its corresponding dataset for the four selected ideal functions.
         determine_max_deviation(): Determines the maximum deviation out of the four
@@ -70,11 +67,8 @@ class EvaluateModel(DetermineIdealFunctions):
         super().sum_of_devia_ideal_func()
         super().calculated_max_deviation()
         self.ideal_dataset = super().get_ideal_dataframe()
-        #Divided by the number of rows of column x to normalize
-        #the value for comparison with maximum deviation of selected
-        #ideal functions from the test data.
-        self.existing_max_devia = super().get_existing_max_devia()/len(
-            self.get_ideal_dataframe().loc[:,'x'])
+        
+        self.existing_max_devia = super().get_existing_max_devia()
         self.four_ideal_func = super().determine_four_ideal()
         self.ols_test = OLS(file_name3)
         self.test_df = self.ols_test.dataframe
@@ -82,35 +76,6 @@ class EvaluateModel(DetermineIdealFunctions):
         self.max = []
         self.ideal_train_devia = []
         self.mapped = None
-    def extract_selected_ideal_data(self):
-        '''
-        Extracts the corresponding selected four ideal function 
-        equivalents of the training dataset
-        returns: a 2-D bearing the corresponding selected four ideal function 
-        equivalents of the training dataset
-        '''
-        col = self.train_df.loc[:,'x']
-        #the corresponding selected four ideal functions dataset
-        #for the test data
-        selected_ideal_dataset = []
-        i=0
-        for value in col:
-            temp_list = []
-            temp_list.insert(0,
-                self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[0]].values[0])
-            temp_list.insert(1,
-                self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[1]].values[0])
-            temp_list.insert(2,
-                self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[2]].values[0])
-            temp_list.insert(3,
-                self.ideal_dataset.loc[self.ideal_dataset['x'] == value,
-                                                      self.four_ideal_func[3]].values[0])
-            selected_ideal_dataset.insert(i, temp_list)
-            i = i+1
-        return selected_ideal_dataset
     def compute_train_devia_from_ideal(self):
         '''
         Computes the squared deviation of the test dataset
@@ -138,7 +103,6 @@ class EvaluateModel(DetermineIdealFunctions):
             ((col_y1[i]-value)**2 + (col_y2[i]-value)**2 + (
                 col_y3[i]-value)**2 + (col_y4[i]-value)**2)/4)
             i = i+1
-        #print("selec_ideal_1_list.insert0", selec_ideal_1_list[0])
         #each row in it, is mean of sum of squared deviation for 
         # y1, y2, y3, y4 training dataset from the four 
         # ideal function. We find mean to normalize it. And we 
@@ -221,9 +185,8 @@ class EvaluateModel(DetermineIdealFunctions):
             self.four_ideal_func[3]+"_res":
                 self.ideal_train_devia[3]
         })
-        data_wrangler = DataWrangler(ideal_train_devia_df)
-        data_wrangler.write_to_file(ideal_train_devia_df,"ideal_train_residuals.csv")
-        
+         
+        super().write_to_file(ideal_train_devia_df, "ideal_train_residuals.csv")        
     def determine_max_deviation(self):
         '''
         Determines the maximum deviation out of the four

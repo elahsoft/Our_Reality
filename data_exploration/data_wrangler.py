@@ -32,8 +32,6 @@ class DataWrangler(DataFrameUtility):
         min of the row.
         column passed to it, that are outliers with the mean value of the column.
         sort_data(pandas.dataframe): Sorts the dataframe by the 'x' column
-        write_to_file(pandas.dataframe, string): Write the wrangled dataframe to file 
-        for fitting to continue.
 
         Example:
             data_wrangler = DataWrangler(file_name="train.csv")

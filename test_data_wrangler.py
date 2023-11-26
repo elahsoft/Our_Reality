@@ -10,12 +10,8 @@ class TestDataWrangler(unittest.TestCase):
     '''
     A simple DataWrangler Test class.
     Attributes:
-        ols(OLS): an object of the OLS class, responsible for the fitting of 
-        a linear regression model on the training dataset
         data_wrangler(DataWrangler): An object of the DataWrangler class, responsible
         for wrangling the dataset
-        df_data(pandas.dataframe): Pandas dataframe object bearing the dataset
-        to be wrangled.
         outlier_x(list): A list bearing outlier values found in column x of our 
         training dataset
         outlier_y1(list): A list bearing outlier values found in column y1 of our 
@@ -56,9 +52,7 @@ class TestDataWrangler(unittest.TestCase):
         Sets up the test via creating objects and variables needed
         for the running of the test
         '''
-        self.ols = OLS("train.csv")
-        self.ols.load_data()
-        self.data_wrangler = DataWrangler(self.ols.dataframe)
+        self.data_wrangler = DataWrangler("train.csv")
         self.outlier_x = self.data_wrangler.find_outliers(self.data_wrangler.df_data.loc[:,'x'])
         self.outlier_y1 = self.data_wrangler.find_outliers(self.data_wrangler.df_data.loc[:,'y1'])
         self.outlier_y2 = self.data_wrangler.find_outliers(self.data_wrangler.df_data.loc[:,'y2'])
@@ -227,7 +221,6 @@ class TestDataWrangler(unittest.TestCase):
         '''
         df = self.data_wrangler.handle_outliers("y3")
         new_outlier_y3 = self.data_wrangler.find_outliers(df.loc[:,'y3'])
-        print(new_outlier_y3)
         self.assertEqual(len(new_outlier_y3) != 0, True,"Points previously considered as outliers ".join(
             "are no longer outliers, it shouldn't be so, since we just "
         ).join("rescaled using natural logarithm and not replacing with mean.")) 
@@ -238,21 +231,5 @@ class TestDataWrangler(unittest.TestCase):
         sorted_df_data = self.data_wrangler.sort_data()
         self.assertEqual(sorted_df_data['x'].is_monotonic_increasing, True,
                          "Dataframe is truly sorted")     
-    def test_write_to_file(self):
-        '''
-        test the method for writing to the dataframe to a csv file
-        '''
-        original_df = self.data_wrangler.df_data
-        df = self.data_wrangler.handle_outliers('y3')
-        self.data_wrangler.write_to_file(df, "train2.csv")
-        ols =  OLS("train2.csv")
-        ols.load_data()
-        read_df = ols.dataframe
-        self.assertEqual(original_df.loc[:,'y3'].tolist() == df.loc[:,'y3'].tolist(), 
-                         False,  "The new ammended dataframe ".join(
-                             "was not written to file."))
-        self.assertEqual(df.loc[:,'y3'].tolist() == read_df.loc[:,'y3'].tolist(), 
-                         True, "The new ammended dataframe ".join(
-                             "was not written to file."))
 if __name__ == '__main__':
     unittest.main()

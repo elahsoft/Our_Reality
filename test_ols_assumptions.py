@@ -54,13 +54,13 @@ class TestOLSAssumptions(unittest.TestCase):
         result = self.ols_assump.check_heterocedasticity()
         print("Heterocedascity P-value (<0.05):", self.ols_assump.p_value)
         self.assertEqual(result[0],False,"variance of the residuals of y1 is "
-                         +"constant across the range of predictor values")
+                         +"not constant across the range of predictor values")
         self.assertEqual(result[1],False,"variance of the residuals of y2 is "
-                         +"constant across the range of predictor values")
+                         +"not constant across the range of predictor values")
         self.assertEqual(result[2],False,"variance of the residuals of y3 is "
-                         +"constant across the range of predictor values")
+                         +"not constant across the range of predictor values")
         self.assertEqual(result[3],False,"variance of the residuals of y4 is "
-                         +"constant across the range of predictor values")
+                         +"not constant across the range of predictor values")
     def test_check_normality(self):
         '''
         Tests the check_normality method that creates a
@@ -71,16 +71,16 @@ class TestOLSAssumptions(unittest.TestCase):
         result = self.ols_assump.check_normality()
         print("Normality P-value (>0.05):", self.ols_assump.jb_p_value)
         self.assertEqual(result[0], True,
-                         "Y1 residuals are normally distributed, inspect visually "+
+                         "Y1 residuals are not normally distributed, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[1], True,
-                         "Y2 residuals are normally distributed, inspect visually "+
+                         "Y2 residuals are not normally distributed, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[2], True,
-                         "Y3 residuals are normally distributed, inspect visually "+
+                         "Y3 residuals are not normally distributed, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[3], True,
-                         "Y4 residuals are normally distributed, inspect visually "+
+                         "Y4 residuals are not normally distributed, inspect visually "+
                          "to be sure.")
     def test_check_linearity(self):
         '''
@@ -93,19 +93,19 @@ class TestOLSAssumptions(unittest.TestCase):
         print("Linearity P-value (< 0.05):", self.ols_assump.rainbow_p_value)
         self.assertEqual(result[0], True,
                          "Y1 Scatter Plot of Fitted Values Against Residuals"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[1], True,
                          "Y2 Scatter Plot of Fitted Values Against Residuals"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[2], True,
                          "Y3 Scatter Plot of Fitted Values Against Residuals"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[3], True,
                          "Y4 Scatter Plot of Fitted Values Against Residuals"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
     def test_check_independence(self):
         '''
@@ -121,15 +121,15 @@ class TestOLSAssumptions(unittest.TestCase):
               self.ols_assump.dw_statistics)
         self.assertEqual(result[0], True,
                          "Y1 Scatter Plot of residuals against order of observation"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[1], True,
                          "Y2 Scatter Plot of residuals against order of observation"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[2], True,
                          "Y3 Scatter Plot of residuals against order of observation"+
-                         " might not show a pattern, inspect visually "+
+                         " might show a pattern, inspect visually "+
                          "to be sure.")
         self.assertEqual(result[3], True,
                          "Y4 Scatter Plot of residuals against order of observation"+
