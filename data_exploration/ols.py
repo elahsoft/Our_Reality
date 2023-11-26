@@ -131,10 +131,10 @@ class OLS(DataFrameUtility):
                  predicted_values.insert(i, self.model[i].predict(x_with_constant))
             i = i+1
         dictionary = {"x":self.dataframe.loc[:,'x'],
-                      "y1_pred": predicted_values[0],
-                      "y2_pred": predicted_values[1],
-                      "y3_pred": predicted_values[2],
-                      "y4_pred": predicted_values[3]}
+                      "y1": predicted_values[0],
+                      "y2": predicted_values[1],
+                      "y3": predicted_values[2],
+                      "y4": predicted_values[3]}
         super().write_to_file(pd.DataFrame(data=dictionary), "predictions.csv")
         return predicted_values
         
