@@ -11,7 +11,7 @@ After that, copy the anaconda folder created in the active user directory on you
 2. Import the development environment packages saved in the file req.txt into the created environment using the command: conda create -n <environment-name> --file req.txt
 
 ### Running Tests
-1. Clone the project repository into the folder you want to house the project.
+1. Clone the project repository into the folder you want to house the project, using git 
 2. Open command prompt and navigate to the folder bearing the project
 3. Run the command: python -m unittest discover -s . -p "*.py" to run the tests.
 
@@ -41,3 +41,4 @@ After that, copy the anaconda folder created in the active user directory on you
 
 * International University of Applied Sciences, Germany
 * PROF. DR. CROITORU, COSMINA
+* PROF. DR. GRAF, ROBERT
