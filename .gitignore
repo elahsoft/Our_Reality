@@ -1,6 +1,9 @@
 #dataset folder
 dataset
 
+#visualization folder
+visualizations
+
 #vscode settings file
 .vscode/settings.json
 # Byte-compiled / optimized / DLL files
