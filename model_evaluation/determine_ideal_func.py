@@ -76,13 +76,6 @@ class DetermineIdealFunctions(DataFrameUtility):
         self.res2 = np.square(self.residuals[1])
         self.res3 = np.square(self.residuals[2])
         self.res4 = np.square(self.residuals[3])
-        self.res_df = pd.DataFrame(data={
-            "res1": self.residuals[0],
-            "res2": self.residuals[1],
-            "res3": self.residuals[2],
-            "res4": self.residuals[3]
-        })
-        super().write_to_file(self.res_df, "residuals.csv")
         self.existing_max_devia = []
         self.sum_of_deviation_val = [0,0,0,0]
         self.sum_of__ideal_deviation = []

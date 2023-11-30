@@ -3,8 +3,6 @@ Imports the needed modules for testing the class
 '''
 import unittest
 from data_exploration.ols_assumptions import OLSAssumptions
-from data_exploration.data_wrangler import DataWrangler
-from data_exploration.ols import OLS
 class TestOLSAssumptions(unittest.TestCase):
     '''
     A simple Test Class for the OLSAssumptions  Class
@@ -39,11 +37,8 @@ class TestOLSAssumptions(unittest.TestCase):
         Sets up the test via creating objects and variables needed
         for the running of the test
         '''
-        self.ols = OLS("train.csv")
-        self.ols.load_data()
-        self.data_wrangler = DataWrangler(self.ols.dataframe)
-        self.df_data = self.data_wrangler.df_data
-        self.ols_assump = OLSAssumptions("train.csv", [False, False, False, False])
+        self.ols_assumption = OLSAssumptions("train.csv", [True, True, True, True])
+        self.df_data = self.ols_assumption.dataframe
     def test_check_heterocedasticity(self):
         '''
         Tests the check_heterocedasticity method.
@@ -51,8 +46,7 @@ class TestOLSAssumptions(unittest.TestCase):
         homocedasticity, hence no transformation
         of y values needed
         '''
-        result = self.ols_assump.check_heterocedasticity()
-        print("Heterocedascity P-value (<0.05):", self.ols_assump.p_value)
+        result = self.ols_assumption.check_heterocedasticity()
         self.assertEqual(result[0],False,"variance of the residuals of y1 is "
                          +"not constant across the range of predictor values")
         self.assertEqual(result[1],False,"variance of the residuals of y2 is "
@@ -68,8 +62,7 @@ class TestOLSAssumptions(unittest.TestCase):
         It also uses a Uses Jarque-Bera Test to check 
         for the Normality of the dataset
         '''
-        result = self.ols_assump.check_normality()
-        print("Normality P-value (>0.05):", self.ols_assump.jb_p_value)
+        result = self.ols_assumption.check_normality()
         self.assertEqual(result[0], True,
                          "Y1 residuals are not normally distributed, inspect visually "+
                          "to be sure.")
@@ -89,8 +82,7 @@ class TestOLSAssumptions(unittest.TestCase):
         for each Y value - y1, y2, y3, y4. It also uses a 
         rainbow test to further check for linearity assumption
         '''
-        result = self.ols_assump.check_linearity()
-        print("Linearity P-value (< 0.05):", self.ols_assump.rainbow_p_value)
+        result = self.ols_assumption.check_linearity()
         self.assertEqual(result[0], True,
                          "Y1 Scatter Plot of Fitted Values Against Residuals"+
                          " might show a pattern, inspect visually "+
@@ -116,9 +108,7 @@ class TestOLSAssumptions(unittest.TestCase):
         The scatter plot should show a random scatter of points
         with no clear upward or downward trend.
         '''
-        result = self.ols_assump.check_independence()
-        print("Independence dw statistics (dw_statistics1 >= 1.5 and dw_statistics1 <= 2.5):",
-              self.ols_assump.dw_statistics)
+        result = self.ols_assumption.check_independence()
         self.assertEqual(result[0], True,
                          "Y1 Scatter Plot of residuals against order of observation"+
                          " might show a pattern, inspect visually "+

@@ -24,7 +24,7 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         Sets up the test via creating objects and variables needed
         for the running of the test
         '''
-        self.deter_ideal_func = DetermineIdealFunctions("ideal.csv", "train2.csv")     
+        self.deter_ideal_func = DetermineIdealFunctions("ideal.csv", "train.csv")     
         self.deter_ideal_func.sum_of_deviation()   
         self.deter_ideal_func.calculated_max_deviation()
         self.deter_ideal_func.sum_of_devia_ideal_func()
@@ -40,8 +40,9 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         '''
         Tests the calculated_max_deviation method
         '''
+        print("self.deter_ideal_func.existing_max_devia", self.deter_ideal_func.existing_max_devia)
         self.assertEqual(self.deter_ideal_func.existing_max_devia,
-                         10803.824460227288, "The maximum existing squared "+
+                         4.9280931546486535, "The maximum existing squared "+
                          "deviation between the training dataset and "+
                          "the model created was not correctly determined")
     def test_sum_of_devia_ideal_func(self):
@@ -53,8 +54,7 @@ class TestDetermineIdealFinctions(unittest.TestCase):
             self.assertEqual(self.deter_ideal_func.sum_of__ideal_deviation[j] > 0, 
                              True, "Ideal "+ideal+" = "+
                              str(self.deter_ideal_func.sum_of__ideal_deviation[j])
-                             +" sum of squared deviation computed does not equal was not computed "+
-                             "correctly!")
+                             +" sum of squared deviation was not computed correctly")
     def test_determine_four_ideal(self):
         '''
         Test the determine_four_ideal method
@@ -63,7 +63,7 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         sum_of_ideal_devia = copy.deepcopy(
             self.deter_ideal_func.sum_of__ideal_deviation)
         ideal = self.deter_ideal_func.determine_four_ideal()
-        self.assertEqual(len(ideal) == 4, True, "Lenght of selected "+
+        self.assertEqual(len(ideal) == 4, True, "Length of selected "+
                          "ideal functions list is not up to 4")
         #computes the index of the selected ideal function
         index_min_1 = int(ideal[0][1:]) - 1

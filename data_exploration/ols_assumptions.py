@@ -6,6 +6,7 @@ import statsmodels.api as sm
 from statsmodels.stats.diagnostic import het_breuschpagan
 from statsmodels.stats.stattools import durbin_watson
 from statsmodels.stats.diagnostic import linear_rainbow
+import copy
 from data_exploration.ols import OLS
 from utility.dataframe_utility import DataFrameUtility
 class OLSAssumptions(OLS):
@@ -104,6 +105,7 @@ class OLSAssumptions(OLS):
         if p_value3 < 0.05:
             result.pop(3)
             result.insert(3, True) #Is Not Homocedastic and so transformation needed for y
+
         return result
     def check_normality(self, fit=True):
         '''
@@ -177,7 +179,7 @@ class OLSAssumptions(OLS):
         returns: A list with boolean values indicating linearity
         '''
         if fit is True:
-            res = self.residuals
+            res = copy.deepcopy(self.residuals)
             pred = [self.model[0].fittedvalues,
                     self.model[1].fittedvalues,
                     self.model[2].fittedvalues,

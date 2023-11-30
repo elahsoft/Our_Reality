@@ -5,7 +5,6 @@ import unittest
 import pandas as pd
 import numpy as np
 from data_exploration.data_wrangler import DataWrangler
-from data_exploration.ols import OLS
 class TestDataWrangler(unittest.TestCase):
     '''
     A simple DataWrangler Test class.
@@ -44,7 +43,7 @@ class TestDataWrangler(unittest.TestCase):
         call the medthod and after we call the method.
         test_find_outliers():test the find outliers method that it works correctly in 
         finding outliers
-        test_handle_outliers():test the method for filling outliers with the mean value
+        test_handle_outliers():test the method for handling outliers
         test_sort_data():test the method for sorting the data        
     '''
     def setUp(self):
@@ -65,17 +64,17 @@ class TestDataWrangler(unittest.TestCase):
         constructed a dataframe from the .csv file
         '''     
         self.assertNotEqual(isinstance(self.data_wrangler.df_data, pd.DataFrame), False,
-                            "The returned value is of type DataFrame")
+                            "The returned value is not of type DataFrame")
     def test_shape_of_data(self):
         '''
         test the shape_data method that it successfully
         returns the shape of the dataframe constructed
         '''        
         df_shape= self.data_wrangler.shape_of_data()
-        self.assertEqual(df_shape[0], 400, "The tuple contains at index 0, the value 400,"+
-                        "which is our number of rows")
-        self.assertEqual(df_shape[1], 5, "The tuple contains at index 1, the value 5,"+
-                        "which is our number of columns")
+        self.assertEqual(df_shape[0], 400, "The tuple does not contain at index 0, "+
+                        "the value 400 which is our number of rows")
+        self.assertEqual(df_shape[1], 5, "The tuple does not contain at index 1, "+
+                        "the value 5, which is our number of columns")
     def test_summary_statistics(self):
         '''
         test the summary_statistics method that it successfully
@@ -84,99 +83,99 @@ class TestDataWrangler(unittest.TestCase):
         df_summary = self.data_wrangler.summary_statistics()
         #Test Mean Values
         self.assertEqual(np.round(df_summary.loc['mean', 'x'],decimals=2), -0.05,
-                         "The mean value of x column was truly computed")
+                         "The mean value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['mean','y1'], decimals=2), -0.01,
-                         "The mean value of y1 column was truly computed")
+                         "The mean value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['mean','y2'],decimals=2), 0.00,
-                         "The mean value of y2 column was truly computed")
+                         "The mean value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['mean','y3'],decimals=2), -20.05,
-                         "The mean value of y3 column was truly computed")
+                         "The mean value of y3 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['mean','y4'],decimals=2), 1.87,
-                         "The mean value of y4 column was truly computed")  
+                         "The mean value of y4 column was not truly computed")  
         #Test Standard Deviations
         self.assertEqual(np.round(df_summary.loc['std', 'x'],decimals=2), 11.56,
-                         "The std value of x column was truly computed")
+                         "The std value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['std', 'y1'],decimals=2), 0.74,
-                         "The std value of y1 column was truly computed")
+                         "The std value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['std', 'y2'],decimals=2), 0.73,
-                         "The std value of y2 column was truly computed")
+                         "The std value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['std', 'y3'],decimals=2), 3038.16,
-                         "The std value of y3 column was truly computed")
+                         "The std value of y3 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['std', 'y4'],decimals=2), 34.68,
-                         "The std value of y4 column was truly computed")
+                         "The std value of y4 column was not truly computed")
         #Test Minimum Values
         self.assertEqual(np.round(df_summary.loc['min', 'x'],decimals=2), -20.00,
-                         "The minimum value of x column was truly computed")
+                         "The minimum value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['min', 'y1'],decimals=2), -1.47,
-                         "The minimum value of y1 column was truly computed")
+                         "The minimum value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['min', 'y2'],decimals=2), -1.43,
-                         "The minimum value of y2 column was truly computed")
+                         "The minimum value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['min', 'y3'],decimals=2), -8020.18,
-                         "The minimum value of y3 column was truly computed")
+                         "The minimum value of y3 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['min', 'y4'],decimals=2), -57.80,
-                         "The minimum value of y4 column was truly computed")
+                         "The minimum value of y4 column was not truly computed")
         #Test 25th Percentile Values
         self.assertEqual(np.round(df_summary.loc['25%', 'x'],decimals=2), -10.02,
-                         "The 25th Percentile value of x column was truly computed")
+                         "The 25th Percentile value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['25%', 'y1'],decimals=2), -0.66,
-                         "The 25th Percentile value of y1 column was truly computed")
+                         "The 25th Percentile value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['25%', 'y2'],decimals=2), -0.59,
-                         "The 25th Percentile value of y2 column was truly computed")
+                         "The 25th Percentile value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['25%', 'y3'],decimals=2), -1017.92,
-                         "The 25th Percentile value of y3 column was truly computed")
+                         "The 25th Percentile value of y3 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['25%', 'y4'],decimals=2), -27.99,
-                         "The 25th Percentile value of y4 column was truly computed")   
+                         "The 25th Percentile value of y4 column was not truly computed")   
         #Test 50th Percentile Values
         self.assertEqual(np.round(df_summary.loc['50%', 'x'],decimals=2), -0.05,
-                         "The 50th Percentile value of x column was truly computed")
+                         "The 50th Percentile value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['50%', 'y1'],decimals=2), 0.030,
-                         "The 50th Percentile value of y1 column was truly computed")
+                         "The 50th Percentile value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['50%', 'y2'],decimals=2), -0.020,
-                         "The 50th Percentile value of y2 column was truly computed")
+                         "The 50th Percentile value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['50%', 'y3'],decimals=2), -0.15,
-                         "The 50th Percentile value of y3 column was truly computed")
+                         "The 50th Percentile value of y3 column was not not truly computed")
         self.assertEqual(np.round(df_summary.loc['50%', 'y4'],decimals=2), 1.79,
-                         "The 50th Percentile value of y4 column was truly computed") 
+                         "The 50th Percentile value of y4 column was not truly computed") 
         #Test 75th Percentile Values
         self.assertEqual(np.round(df_summary.loc['75%', 'x'],decimals=2), 9.93,
-                         "The 75th Percentile value of x column was truly computed")
+                         "The 75th Percentile value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['75%', 'y1'],decimals=2), 0.64,
-                         "The 75th Percentile value of y1 column was truly computed")
+                         "The 75th Percentile value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['75%', 'y2'],decimals=2), 0.61,
-                         "The 75th Percentile value of y2 column was truly computed")
+                         "The 75th Percentile value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['75%', 'y3'],decimals=2), 987.71,
-                         "The 75th Percentile value of y3 column was truly computed")
+                         "The 75th Percentile value of y3 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['75%', 'y4'],decimals=2), 31.82,
-                         "The 75th Percentile value of y4 column was truly computed")         
+                         "The 75th Percentile value of y4 column was not truly computed")         
         #Test Maximum Values
         self.assertEqual(np.round(df_summary.loc['max', 'x'],decimals=2), 19.90,
-                         "The Maximum value of x column was truly computed")
+                         "The Maximum value of x column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['max', 'y1'],decimals=2), 1.38,
-                         "The Maximum value of y1 column was truly computed")
+                         "The Maximum value of y1 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['max', 'y2'],decimals=2), 1.42,
-                         "The Maximum value of y2 column was truly computed")
+                         "The Maximum value of y2 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['max', 'y3'],decimals=2), 7900.73,
-                         "The Maximum value of y3 column was truly computed")
+                         "The Maximum value of y3 column was not truly computed")
         self.assertEqual(np.round(df_summary.loc['max', 'y4'],decimals=2), 61.91,
-                         "The Maximum value of y4 column was truly computed")
+                         "The Maximum value of y4 column was not truly computed")
     def test_find_missing_values(self):
         '''
         test the find_missing_values method that it successfully
         returns a dataframe bearing the count of NaN values of each dataframe column
         '''
         result = self.data_wrangler.find_missing_values()
-        self.assertEqual(result.loc['x'], 0,"Column x has no missing values (Nan)")
-        self.assertEqual(result.loc['y1'], 0,"Column y1 has no missing values (Nan)")
-        self.assertEqual(result.loc['y2'], 0,"Column y2 has no missing values (Nan)")
-        self.assertEqual(result.loc['y3'], 0,"Column y3 has no missing values (Nan)")
-        self.assertEqual(result.loc['y4'], 0,"Column y4 has no missing values (Nan)")
+        self.assertEqual(result.loc['x'], 0,"Column x has  missing values (Nan)")
+        self.assertEqual(result.loc['y1'], 0,"Column y1 has  missing values (Nan)")
+        self.assertEqual(result.loc['y2'], 0,"Column y2 has  missing values (Nan)")
+        self.assertEqual(result.loc['y3'], 0,"Column y3 has  missing values (Nan)")
+        self.assertEqual(result.loc['y4'], 0,"Column y4 has  missing values (Nan)")
     def test_duplicated_rows(self):
         '''
         test the duplicated_rows method that it successfully
         returns a series bearing False for all elements
         '''
         result = self.data_wrangler.duplicated_rows()
-        self.assertEqual(result.all() == False,True, "No Row is a duplicated row") # pylint: disable=simplifiable-if-statement
+        self.assertEqual(result.all() is False,True, "There is a Row that is a duplicated row") # pylint: disable=simplifiable-if-statement
     def test_drop_duplicated(self):
         '''
         test the drop_duplicated method that it successfully
@@ -184,52 +183,51 @@ class TestDataWrangler(unittest.TestCase):
         shape since we have no duplicate rows
         '''
         result = self.data_wrangler.drop_duplicated()
-        self.assertEqual(result.shape == (400,5), True,  "We still have the same shape of dataset")
+        self.assertEqual(result.shape == (400,5), True,  "We do not have the same shape of dataset")
     def test_fill_missing_values(self):
         '''
-        test the fill_missing_vales method that it successfully
+        test the fill_missing_values method that it successfully
         filled missing values. In our dataset, we have no missing values,
         so we test that count of missing values is same before we 
-        call the medthod and after we call the method.
+        call the method and after we call the method.
         '''
         initial_result = self.data_wrangler.find_missing_values()
         self.data_wrangler.df_data = self.data_wrangler.fill_missing_values()
         later_result = self.data_wrangler.find_missing_values()
         self.assertEqual(initial_result.loc['x'] == later_result.loc['x'], True,
-                         "Column x has no missing values (Nan)")
+                         "Column x has missing values (Nan)")
         self.assertEqual(initial_result.loc['y1'] == later_result.loc['y1'], True,
-                         "Column y1 has no missing values (Nan)")
+                         "Column y1 has  missing values (Nan)")
         self.assertEqual(initial_result.loc['y2'] == later_result.loc['y2'], True,
-                         "Column y2 has no missing values (Nan)")
+                         "Column y2 has  missing values (Nan)")
         self.assertEqual(initial_result.loc['y3'] == later_result.loc['y3'], True,
-                         "Column y3 has no missing values (Nan)")
+                         "Column y3 has  missing values (Nan)")
         self.assertEqual(initial_result.loc['y4'] == later_result.loc['y4'], True,
-                         "Column y4 has no missing values (Nan)")
+                         "Column y4 has  missing values (Nan)")
     def test_find_outliers(self):
         '''
         test the find outliers method that it works correctly in 
         finding outliers
         '''
-        self.assertEqual(len(self.outlier_x) == 0, True,"No Outliers in Column X")
-        self.assertEqual(len(self.outlier_y1) == 0, True,"No Outliers in Column Y1")
-        self.assertEqual(len(self.outlier_y2) == 0, True,"No Outliers in Column Y2")
-        self.assertEqual(len(self.outlier_y3) != 0, True,"No Outliers in Column Y3")        
-        self.assertEqual(len(self.outlier_y4) == 0, True,"No Outliers in Column Y4")
+        self.assertEqual(len(self.outlier_x) == 0, True,"There's Outliers in Column X")
+        self.assertEqual(len(self.outlier_y1) == 0, True,"There's Outliers in Column Y1")
+        self.assertEqual(len(self.outlier_y2) == 0, True,"There's Outliers in Column Y2")
+        self.assertEqual(len(self.outlier_y3) != 0, True,"There's Outliers in Column Y3")        
+        self.assertEqual(len(self.outlier_y4) == 0, True,"There's Outliers in Column Y4")
     def test_handle_outliers(self):
         '''
-        test the method for filling outliers with the mean value
+        test the method for handling outliers
         '''
         df = self.data_wrangler.handle_outliers("y3")
         new_outlier_y3 = self.data_wrangler.find_outliers(df.loc[:,'y3'])
         self.assertEqual(len(new_outlier_y3) != 0, True,"Points previously considered as outliers ".join(
-            "are no longer outliers, it shouldn't be so, since we just "
-        ).join("rescaled using natural logarithm and not replacing with mean.")) 
+            "are still outliers")) 
     def test_sort_data(self):
         '''
         test the method for sorting the data
         '''
         sorted_df_data = self.data_wrangler.sort_data()
         self.assertEqual(sorted_df_data['x'].is_monotonic_increasing, True,
-                         "Dataframe is truly sorted")     
+                         "Dataframe is npt sorted")     
 if __name__ == '__main__':
     unittest.main()

@@ -44,13 +44,13 @@ class OLS(DataFrameUtility):
         fit_regression Method for the OLS Class
         returns: The resultant model from the fitting done.
         add_polynomial_term: A boolean list indicating if a polynomial term should be 
-        before the fitting in order to capture complexity.
+        added before the fitting in order to capture complexity.
         '''
-        #Add polynomial features (degree = 3) to introduce complexity
-        degree = 3
-        alpha = 0.1 #Regularization parameter
+        #Add polynomial features (degree = 4) to introduce complexity
+        degree = 8
+        alpha = 2 #Regularization parameter
         if add_polynomial_term[0] is True:
-            poly = PolynomialFeatures(degree=degree, include_bias=False)
+            poly = PolynomialFeatures(degree=degree, include_bias=True)
             x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
             #done to avoid having a zero intercept
             x_with_constant = sm.add_constant(x_poly)  
@@ -108,6 +108,13 @@ class OLS(DataFrameUtility):
         self.residuals.insert(1, np.subtract(self.dataframe.loc[:,'y2'],predicted_values[1]))
         self.residuals.insert(2, np.subtract(self.dataframe.loc[:,'y3'],predicted_values[2]))
         self.residuals.insert(3, np.subtract(self.dataframe.loc[:,'y4'],predicted_values[3]))
+        res_df = pd.DataFrame(data={
+            "res1": self.residuals[0],
+            "res2": self.residuals[1],
+            "res3": self.residuals[2],
+            "res4": self.residuals[3]
+        })
+        super().write_to_file(res_df, "residuals.csv")
         return self.residuals
     def prepare_predicted_value(self, add_polynomial_term):
         '''
@@ -121,7 +128,7 @@ class OLS(DataFrameUtility):
         i=0
         while i < 4:
             if add_polynomial_term[i] is True:
-                poly = PolynomialFeatures(degree=3, include_bias=False)
+                poly = PolynomialFeatures(degree=8, include_bias=False)
                 x_poly = poly.fit_transform(np.array(self.dataframe.loc[:,'x']).reshape(-1,1))
                 #done to avoid having a zero intercept
                 x_with_constant = sm.add_constant(x_poly)
