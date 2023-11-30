@@ -29,24 +29,34 @@ class DetermineIdealFunctions(DataFrameUtility):
         to the training dataset independent variable x and dependent variable y3
         res4(list): A list bearing the residuals of of the model we created with respect
         to the training dataset independent variable x and dependent variable y4
-        existing_max_devia(float): A numeric value that is the maximum sum of squared
-        deviation existing between the models created with respect to the training dataset        
-        sum_of_deviation_val(list): A list that bears the sum of squared deviation of each 
-        dependent variable from the predictive model gotten from the fit.
+        existing_max_devia(list): A numeric list that bears the maximum squared
+        deviation existing between the models created with respect to the training dataset 
+        for the n rows of dataset.        
+        existing_deviation_val(list): A list that bears the squared deviation of each 
+        dependent variable in the training datasetfrom the predictive model gotten from 
+        the fit.
         sum_of__ideal_deviation(list): A list bearing the sum of squared deviation of 
         each ideal function from the four predictive model
+        max_ideal_train_devia(list): A list that bears indices of the selected ideal 
+        functions with the maximum mean squared deviation from the training dataset
     Methods:
         get_existing_max_devia():Returns the exisiting maximum deviation of the
         created model from the training dataset
-        sum_of_deviations(): computes the sum of squared residuals for the different
-        models created for y1, y2, y3 and y4.
-        calculated_max_deviation(): uses the numpy max function to determine the
-        maximum sum of deviation - existing maximum deviation of the calculated
-        regression.
+        squared_deviation(): Computes the squared deviation of the each fitted functions 
+        from the train dataset and calls the calculated_max_deviation method to pick the 
+        maximum out of the four deviation values.
+        calculated_max_deviation(integer): uses the numpy max function to determine the
+        maximum squared of deviation - existing maximum deviation of the calculated
+        regression out of the four values in the list existing_deviation_val and insert it 
+        to a list existing_max_devia.
         sum_of_devia_ideal_func(): determines the average sum of squared deviation of the
         training dataset from each ideal function passed to it.
         determine _four_ideal(): determines the 4 ideal functions with the least sum of 
-        deviation  
+        deviation
+        determine_max_ideal_train_devia(list): Determines the selected ideal functions with the 
+        maximum mean squared deviation from the training dataset for each row of the dataset and 
+        updates max_ideal_train_devia instance variable with the index of the selected ideal 
+        functions that have the mean squared deviation as the maximum. 
     Function:
         compute_train_ideal_devia(y_train, y_ideal): computes the deviation of ideal
         function dataset y_ideal from the training dataset y_train
@@ -77,8 +87,9 @@ class DetermineIdealFunctions(DataFrameUtility):
         self.res3 = np.square(self.residuals[2])
         self.res4 = np.square(self.residuals[3])
         self.existing_max_devia = []
-        self.sum_of_deviation_val = [0,0,0,0]
+        self.existing_deviation_val = [0,0,0,0]
         self.sum_of__ideal_deviation = []
+        self.max_ideal_train_devia = []
     def get_ideal_dataframe(self):
         '''
         Returns the dataframe of the ideal functions dataset
@@ -91,41 +102,37 @@ class DetermineIdealFunctions(DataFrameUtility):
         created model from the training dataset
         '''
         return self.existing_max_devia
-    def calculated_max_deviation(self):
+    def calculated_max_deviation(self, row_number):
         '''
-        Determines the maximum out of the sum of 
+        Determines the maximum out of the squared
         deviation of each predictive model created
-        from the training dataset
+        from the training dataset and insert it to a list
+        row_number: The row number that we are computing
+        the existing maximum deviation.
         '''
-        #Divided by the number of rows of training dataset to normalize
-        #the value for comparison with maximum deviation of selected
-        #ideal functions from the test data.
-        self.existing_max_devia = np.max(np.array(
-            self.sum_of_deviation_val))/400
-    def sum_of_deviation(self):
+        self.existing_max_devia.insert(row_number, np.max(np.array(
+            self.existing_deviation_val)))
+    def squared_deviation(self):
         '''
-        Computes the sum of squared deviation of the each fitted functions 
-        from the train dataset and takes the mean to normalize it, 
-        and updates the list sum_of_deviation_val
+        Computes the squared deviation of the each fitted functions 
+        from the train dataset and calls the calculated_max_deviation
+        method to pick the maximum out of the four deviation values.
         '''
         df_res = pd.read_csv(cf.INPUT_FILE_PATH+"residuals.csv")
-        sum_value=0
-        for value in df_res.loc[:,'res1']:
-            sum_value = sum_value + np.square(value)
-        self.sum_of_deviation_val[0] = sum_value
-        sum_value=0
-        for value in df_res.loc[:,'res2']:
-            sum_value = sum_value + np.square(value)
-        self.sum_of_deviation_val[1] = sum_value
-        sum_value=0
-        for value in df_res.loc[:,'res3']:
-            sum_value = sum_value + np.square(value)
-        self.sum_of_deviation_val[2] = sum_value
-        sum_value=0
-        for value in df_res.loc[:,'res4']:
-            sum_value = sum_value + np.square(value)
-        self.sum_of_deviation_val[3] = sum_value
-        
+        for count in range(len(df_res.loc[:,'res1'])):
+            self.existing_deviation_val.insert(0, 
+                    np.square(df_res.loc[:,'res1'][count]))
+            self.existing_deviation_val.insert(1, 
+                    np.square(df_res.loc[:,'res2'][count]))
+            self.existing_deviation_val.insert(2, 
+                    np.square(df_res.loc[:,'res3'][count]))
+            self.existing_deviation_val.insert(3, 
+                    np.square(df_res.loc[:,'res4'][count]))
+            self.calculated_max_deviation(count)
+        existing_max_devia_df = pd.DataFrame(data={
+            'max_devia': self.existing_max_devia
+        })
+        super().write_to_file(existing_max_devia_df, "existing_max_devia.csv")
     def sum_of_devia_ideal_func(self):
         '''
         Computes the sum of deviation of each ideal function 
@@ -158,9 +165,45 @@ class DetermineIdealFunctions(DataFrameUtility):
         })
         super().write_to_file(sel_ideal_df, "selected_ideal.csv")
         return ideal
+    def determine_max_ideal_train_devia(self, ideal):
+        '''
+        Determines the selected ideal functions with the 
+        maximum mean squared deviation from the training dataset for
+        each row of the dataset and updates max_ideal_train_devia 
+        instance variable with the index of the selected ideal functions
+        that have the mean squared deviation as the maximum.
+        ideal: A list of the selected ideal functions dataset 
+        '''
+        ideal1 = self.df.loc[:,ideal[0]]
+        ideal2 = self.df.loc[:,ideal[1]]
+        ideal3 = self.df.loc[:,ideal[2]]
+        ideal4 = self.df.loc[:,ideal[3]]
+        for count in range(400):
+            #compute the mean deviation of eacj ideal function from the 
+            #training dataset for the row number - count in consideration. 
+            ideal1_devia = (np.square(ideal1[count]-self.train[0][count])+
+                                 np.square(ideal1[count]-self.train[1][count])+ 
+                                 np.square(ideal1[count]-self.train[2][count])+
+                                 np.square(ideal1[count]-self.train[3][count]))/4
+            ideal2_devia = (np.square(ideal2[count]-self.train[0][count])+
+                                 np.square(ideal2[count]-self.train[1][count])+
+                                 np.square(ideal2[count]-self.train[2][count])+
+                                 np.square(ideal2[count]-self.train[3][count]))/4
+            ideal3_devia = (np.square(ideal3[count]-self.train[0][count])+
+                                 np.square(ideal3[count]-self.train[1][count])+
+                                 np.square(ideal3[count]-self.train[2][count])+
+                                 np.square(ideal3[count]-self.train[3][count]))/4
+            ideal4_devia = (np.square(ideal4[count]-self.train[0][count])+
+                                 np.square(ideal4[count]-self.train[1][count])+
+                                 np.square(ideal4[count]-self.train[2][count])+
+                                 np.square(ideal4[count]-self.train[3][count]))/4
+            row_devia = [ideal1_devia, ideal2_devia, ideal3_devia, ideal4_devia]
+            max_value = np.max(row_devia)
+            index = row_devia.index(max_value)
+            self.max_ideal_train_devia.insert(count, index)        
 def compute_train_ideal_devia(y_train, y_ideal):
     '''
-    Determines the sum of squared deviation of the ideal 
+    Determines the squared deviation of the ideal 
     function dataset y_ideal from the train dataset y_train.
     y_ideal: The ideal function dataset to compute its deviation from the 
     training dataset

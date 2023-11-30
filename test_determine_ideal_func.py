@@ -15,36 +15,29 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         setUp(): Does the initialization of attributes needed for running 
         the test.
         test_sum_of_deviation(): Tests the sum_of_deviation method.
-        test_calculated_max_deviation(): Tests the calculated_max_deviation method
+        test_squared_deviation(): Tests the squared_deviation method
         test_sum_of_devia_ideal_func():Tests the sum_of_devia_ideal_func
-
+        test_determine_max_ideal_train_devia(self): Test the determine_max_ideal_train_devia method
     '''
     def setUp(self):
         '''
         Sets up the test via creating objects and variables needed
         for the running of the test
         '''
-        self.deter_ideal_func = DetermineIdealFunctions("ideal.csv", "train.csv")     
-        self.deter_ideal_func.sum_of_deviation()   
-        self.deter_ideal_func.calculated_max_deviation()
+        self.deter_ideal_func = DetermineIdealFunctions("ideal.csv", "train.csv") 
+        self.deter_ideal_func.squared_deviation()
         self.deter_ideal_func.sum_of_devia_ideal_func()
-    def test_sum_of_deviation(self):
+        ideal = self.deter_ideal_func.determine_four_ideal()
+        self.deter_ideal_func.determine_max_ideal_train_devia(ideal)
+    def test_squared_deviation(self):
         '''
         Tests the sum_of_deviation method.
         '''
-        self.assertEqual(len(self.deter_ideal_func.sum_of_deviation_val),
-                         4,
-                         "The sum of squared deviation of each model created  "+
-                         "from the training dataset was not actually computed")
-    def test_calculated_max_deviation(self):
-        '''
-        Tests the calculated_max_deviation method
-        '''
-        print("self.deter_ideal_func.existing_max_devia", self.deter_ideal_func.existing_max_devia)
-        self.assertEqual(self.deter_ideal_func.existing_max_devia,
-                         4.9280931546486535, "The maximum existing squared "+
-                         "deviation between the training dataset and "+
-                         "the model created was not correctly determined")
+        self.assertEqual(len(self.deter_ideal_func.existing_max_devia),
+                         400,
+                         "The maximum value of the row wise squared deviation of "+
+                         "each model created from the training dataset was not actually "+
+                         "computed")
     def test_sum_of_devia_ideal_func(self):
         '''
         Tests the sum_of_devia_ideal_func
@@ -82,5 +75,13 @@ class TestDetermineIdealFinctions(unittest.TestCase):
         self.assertEqual(sum_of_ideal_devia[index_min_4] is not None,
                          True, "Ideal Function y"+str(index_min_4+1)+
                          " Sum of Deviation was correctly retrieved")
+    def test_determine_max_ideal_train_devia(self):
+        '''
+        Test the determine_max_ideal_train_devia method
+        '''
+        self.assertEqual(len(self.deter_ideal_func.max_ideal_train_devia) > 0,
+                         True, "The indices of the selected ideal functions "+
+                         "with the maximum deviation from the dataset "+
+                         "row wise were not added to the max_ideal_train_devia list")
 if __name__ == '__main__':
     unittest.main()   
