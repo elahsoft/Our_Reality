@@ -124,13 +124,13 @@ class EvaluateModel(DetermineIdealFunctions):
         variables of the training dataset would have a very large deviation value, so based on this in 
         the routine below for mapping, we mapped using the condition that the existing maximum deviation 
         for each row of the training dataset must be less than the largest deviation of the selected 
-        ideal functions from the training dataset by factor of two.
+        ideal functions from the training dataset by factor of sqrt(2).
         '''
         j = 0
         for ind in self.max_ideal_train_devia:
             dev = [None,None,None,None]
             for i in ind:
-                if self.existing_max_devia[j] < (np.sqrt(2)*self.ideal_train_devia[j][i]):
+                if self.existing_max_devia[j] * np.sqrt(2) < self.ideal_train_devia[j][i]:
                     dev[i] = self.ideal_train_devia[j][i]
             j = j+1
             self.mapping.insert(j, dev)
