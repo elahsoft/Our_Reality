@@ -83,5 +83,9 @@ class TestDetermineIdealFinctions(unittest.TestCase):
                          True, "The indices of the selected ideal functions "+
                          "with the maximum deviation from the dataset "+
                          "row wise were not added to the max_ideal_train_devia list")
+        self.assertEqual(len(self.deter_ideal_func.ideal_train_devia) > 0, True, 
+                         "The deviation of the selected ideal functions "+
+                         "from the training dataset row wise were not added "
+                         +"to the ideal_train_devia list")
 if __name__ == '__main__':
     unittest.main()   

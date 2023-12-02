@@ -24,7 +24,7 @@ class DataFrameUtility(object):
         dataframe_utility.load_data()
         print(dataframe_utility.get_dataframe().head())
     """
-    def __init__(self,file_name):
+    def __init__(self,file_name=None):
         '''
         Constructor for the DataFrameUtility Class
         file_name: The file bearing the dataset for a dataframe

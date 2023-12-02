@@ -175,7 +175,7 @@ class TestDataWrangler(unittest.TestCase):
         returns a series bearing False for all elements
         '''
         result = self.data_wrangler.duplicated_rows()
-        self.assertEqual(result.all() is False,True, "There is a Row that is a duplicated row") # pylint: disable=simplifiable-if-statement
+        self.assertEqual(result.all(), False, "There is a Row that is a duplicated row") # pylint: disable=simplifiable-if-statement
     def test_drop_duplicated(self):
         '''
         test the drop_duplicated method that it successfully

@@ -39,6 +39,8 @@ class DetermineIdealFunctions(DataFrameUtility):
         each ideal function from the four predictive model
         max_ideal_train_devia(list): A list that bears indices of the selected ideal 
         functions with the maximum mean squared deviation from the training dataset
+        ideal_train_devia(list): A 2D list that bears the mean squared deviation of each
+        selected ideal function from the training dataset row wise.
     Methods:
         get_existing_max_devia():Returns the exisiting maximum deviation of the
         created model from the training dataset
@@ -87,9 +89,10 @@ class DetermineIdealFunctions(DataFrameUtility):
         self.res3 = np.square(self.residuals[2])
         self.res4 = np.square(self.residuals[3])
         self.existing_max_devia = []
-        self.existing_deviation_val = [0,0,0,0]
+        self.existing_deviation_val = []
         self.sum_of__ideal_deviation = []
         self.max_ideal_train_devia = []
+        self.ideal_train_devia = []
     def get_ideal_dataframe(self):
         '''
         Returns the dataframe of the ideal functions dataset
@@ -119,7 +122,8 @@ class DetermineIdealFunctions(DataFrameUtility):
         method to pick the maximum out of the four deviation values.
         '''
         df_res = pd.read_csv(cf.INPUT_FILE_PATH+"residuals.csv")
-        for count in range(len(df_res.loc[:,'res1'])):
+        for count in range(len(df_res.loc[:,'res1'])):            
+            self.existing_deviation_val = []
             self.existing_deviation_val.insert(0, 
                     np.square(df_res.loc[:,'res1'][count]))
             self.existing_deviation_val.insert(1, 
@@ -128,6 +132,8 @@ class DetermineIdealFunctions(DataFrameUtility):
                     np.square(df_res.loc[:,'res3'][count]))
             self.existing_deviation_val.insert(3, 
                     np.square(df_res.loc[:,'res4'][count]))
+            print("existing deviations of computed regressions for row: "+str(count+1),
+                  self.existing_deviation_val)
             self.calculated_max_deviation(count)
         existing_max_devia_df = pd.DataFrame(data={
             'max_devia': self.existing_max_devia
@@ -198,9 +204,11 @@ class DetermineIdealFunctions(DataFrameUtility):
                                  np.square(ideal4[count]-self.train[2][count])+
                                  np.square(ideal4[count]-self.train[3][count]))/4
             row_devia = [ideal1_devia, ideal2_devia, ideal3_devia, ideal4_devia]
+            self.ideal_train_devia.insert(count, row_devia)
             max_value = np.max(row_devia)
-            index = row_devia.index(max_value)
-            self.max_ideal_train_devia.insert(count, index)        
+            max_indices = [index for index, 
+                            value in enumerate(row_devia) if value == max_value]
+            self.max_ideal_train_devia.insert(count, max_indices)        
 def compute_train_ideal_devia(y_train, y_ideal):
     '''
     Determines the squared deviation of the ideal 
